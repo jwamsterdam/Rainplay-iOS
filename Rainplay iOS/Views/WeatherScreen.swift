@@ -134,7 +134,6 @@ struct WeatherScreen: View {
     private func decisionSheet() -> some View {
         VStack(spacing: 0) {
             DayCarousel(model: model)
-                .padding(.top, 4)
 
             VStack(spacing: 9) {
                 SegmentedControl(
@@ -157,7 +156,7 @@ struct WeatherScreen: View {
                 .foregroundStyle(Tokens.inkSoft)
                 .padding(.top, 14)
         }
-        .padding(.top, 14)
+        .padding(.top, 6)
         .padding(.horizontal, 10)
         // Trekt de attributie iets richting de home-indicator (net als de PWA,
         // die ~16px van de safe-area-inset aftrekt) zodat de ondermarge niet te

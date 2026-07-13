@@ -25,7 +25,7 @@ struct DayChart: View {
 
     private var rainMax: Double { geometry.rainMax }
     private let plotHeight: CGFloat = 232
-    private let topRowsHeight: CGFloat = 48   // ruimte boven de plot voor score + iconen
+    private let topRowsHeight: CGFloat = 64   // ruimte boven de plot voor score + iconen
 
     var body: some View {
         let geo = geometry
@@ -185,11 +185,13 @@ private struct ChartScoreIconRows: View {
         ForEach(Array(hours.enumerated()), id: \.offset) { _, hour in
             if let xInPlot = proxy.position(forX: hour.time) {
                 let x = rect.minX + xInPlot
+                // Score-badge + icoon vormen samen één rij, verticaal gecentreerd in de
+                // ruimte tussen de bovenrand van de sheet en de top van de grafiek.
                 scoreBadge(hour)
-                    .position(x: x, y: rect.minY - topRowsHeight + 12)
+                    .position(x: x, y: rect.minY - topRowsHeight + 16)
                 if showIcons {
                     WeatherIcon(kind: hour.kind, size: 20)
-                        .position(x: x, y: rect.minY - 12)
+                        .position(x: x, y: rect.minY - topRowsHeight + 40)
                         .accessibilityLabel("\(hour.time): \(hour.kind.displayName)")
                 }
             }
