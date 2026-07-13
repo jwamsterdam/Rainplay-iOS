@@ -18,7 +18,6 @@ struct DecisionSummaryTests {
         let summary = decisionSummary(forecast: nil, day: .vandaag, horizon: .heleDag, now: Date())
         #expect(summary.temperature == nil)
         #expect(summary.bestStartTime == "--:--")
-        #expect(summary.bestWindowLabel == "--:--")
         #expect(summary.summaryLabel == "Geen duidelijk buitenmoment")
         #expect(summary.dateLabel == "")
     }
@@ -36,6 +35,6 @@ struct DecisionSummaryTests {
         #expect(summary.temperature == 21)                       // live temp, niet het gemiddelde
         #expect(summary.dateLabel.contains("do"))                // donderdag 11 juni
         #expect(summary.bestStartTime != "--:--")                // er is een venster
-        #expect(summary.bestWindowLabel.contains(" - "))
+        #expect(summary.summaryLabel.contains("beste"))          // vriendelijke nuance-regel
     }
 }

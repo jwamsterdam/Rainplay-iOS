@@ -6,8 +6,6 @@ struct WeatherScreen: View {
     @Bindable var model: AppModel
     @State private var settingsOpen = false
     @State private var locationMenuOpen = false
-    // Laat de "Beste moment"-pill meeschalen met de Dynamic Type-voorkeur.
-    @ScaledMetric(relativeTo: .body) private var pillFontSize: CGFloat = 18
 
     // Alle afgeleide kop-informatie in één keer berekend (temperatuur, datum,
     // beste-moment-venster, adviesteksten) — zie DecisionSummary.
@@ -26,7 +24,7 @@ struct WeatherScreen: View {
             OfflineBanner(isOffline: model.networkMonitor.isOffline)
             hero(summary)
             Spacer(minLength: 0)
-            decisionSheet(summary)
+            decisionSheet()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         // De hero-foto vult het volledige scherm ACHTER de content; door hem als
@@ -133,23 +131,10 @@ struct WeatherScreen: View {
 
     // MARK: - Decision sheet
 
-    private func decisionSheet(_ summary: DecisionSummary) -> some View {
+    private func decisionSheet() -> some View {
         VStack(spacing: 0) {
-            // Beste-moment-pill
-            HStack(spacing: 8) {
-                Text("Beste moment")
-                Text(summary.bestWindowLabel)
-                    .fontWeight(.heavy)
-            }
-            .font(.system(size: pillFontSize, weight: .semibold))
-            .foregroundStyle(Tokens.ink)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 13)
-            .background(Tokens.best, in: RoundedRectangle(cornerRadius: 15))
-            .padding(.horizontal, 8)
-
             DayCarousel(model: model)
+                .padding(.top, 4)
 
             VStack(spacing: 9) {
                 SegmentedControl(

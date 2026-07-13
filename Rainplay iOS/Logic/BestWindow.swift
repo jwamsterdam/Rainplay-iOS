@@ -19,6 +19,8 @@ func bestWindowLabel(_ hours: [HourlyWeather]) -> String {
     return "\(bestWindow.startTime) - \(bestWindow.endTime)"
 }
 
+// Nuance-regel onder het verdict: benoemt de beste dagperiode en waarschuwt voor
+// regen vóór of ná het venster.
 func outdoorSummaryLabel(_ hours: [HourlyWeather], bestWindow: OutdoorWindow?) -> String {
     guard let bestWindow else { return "Geen duidelijk buitenmoment" }
 

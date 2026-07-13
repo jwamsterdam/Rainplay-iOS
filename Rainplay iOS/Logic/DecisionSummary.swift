@@ -8,7 +8,6 @@ struct DecisionSummary: Equatable {
     var temperature: Int?
     var dateLabel: String
     var bestStartTime: String
-    var bestWindowLabel: String
     var summaryLabel: String
 }
 
@@ -35,7 +34,6 @@ func decisionSummary(
         temperature: temperature,
         dateLabel: headerDateLabel(forecast?.hourly ?? [], day: day),
         bestStartTime: window?.startTime ?? "--:--",
-        bestWindowLabel: window.map { "\($0.startTime) - \($0.endTime)" } ?? "--:--",
         summaryLabel: outdoorSummaryLabel(hours, bestWindow: window)
     )
 }
