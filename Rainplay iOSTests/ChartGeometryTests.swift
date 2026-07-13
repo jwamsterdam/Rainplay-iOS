@@ -4,10 +4,11 @@ import Foundation
 
 // De dubbele-as-geometrie (temperatuur ↔ regen-domein).
 struct ChartGeometryTests {
-    private func hours(_ temps: [Double]) -> [HourlyWeather] {
+    private func hours(_ temps: [Double], precip: [Double] = []) -> [HourlyWeather] {
         temps.enumerated().map { i, t in
             HourlyWeather(isoTime: "2026-07-09T\(String(format: "%02d", i)):00",
-                          time: "\(i):00", temperatureC: t, score: 5, precipitationMm: 0)
+                          time: "\(i):00", temperatureC: t, score: 5,
+                          precipitationMm: i < precip.count ? precip[i] : 0)
         }
     }
 
@@ -51,7 +52,7 @@ struct ChartGeometryTests {
     @Test func sharedRangeSpansAllGroups() {
         // Twee dagen met verschillende temperaturen → één gedeelde as die beide dekt.
         let range = ChartGeometry.temperatureRange(across: [hours([10, 15]), hours([20, 25])])
-        let geo = ChartGeometry(temperatureRange: range)
+        let geo = ChartGeometry(temperatureRange: range, precipitationMax: nil)
         #expect(geo.tempMin <= 10 - 1)   // dekt de laagste van alle dagen
         #expect(geo.tempMax >= 25 + 1)   // dekt de hoogste van alle dagen
     }
@@ -59,7 +60,22 @@ struct ChartGeometryTests {
     @Test func normalizeMapsBoundsToDomainEdges() {
         let geo = ChartGeometry(hours: hours([10, 20]))   // min 10, max 20
         #expect(geo.normalizedTemp(geo.tempMin) == 0)
-        #expect(geo.normalizedTemp(geo.tempMax) == geo.maxMM)
+        #expect(geo.normalizedTemp(geo.tempMax) == geo.rainMax)
+    }
+
+    // MARK: - Regen-as
+
+    @Test func rainAxisFloorsAtThree() {
+        // Weinig regen (max 1 mm) → as blijft 3 mm, zodat 1 mm niet "veel" lijkt.
+        let geo = ChartGeometry(hours: hours([18, 20], precip: [0.4, 1.0]))
+        #expect(geo.rainMax == 3)
+    }
+
+    @Test func rainAxisGrowsAboveThree() {
+        // Flinke bui (5,4 mm) → as groeit mee zodat balken niet buiten beeld lopen.
+        let geo = ChartGeometry(hours: hours([18, 20], precip: [5.4, 2.0]))
+        #expect(geo.rainMax == 6)                 // ⌈5,4⌉
+        #expect(geo.rainTicks.last == geo.rainMax) // bovenste regenwaarde zichtbaar
     }
 
     @Test func temperatureIsInverseOfNormalize() {

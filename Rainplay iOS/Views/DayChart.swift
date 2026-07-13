@@ -23,7 +23,7 @@ struct DayChart: View {
     var isToday: Bool = false
     var currentTemperatureC: Int?
 
-    private var maxMM: Double { geometry.maxMM }
+    private var rainMax: Double { geometry.rainMax }
     private let plotHeight: CGFloat = 232
     private let topRowsHeight: CGFloat = 48   // ruimte boven de plot voor score + iconen
 
@@ -34,7 +34,7 @@ struct DayChart: View {
             if showTemp { temperatureLine(geo) }
         }
         .chartXScale(domain: hours.map(\.time))
-        .chartYScale(domain: 0...maxMM)
+        .chartYScale(domain: 0...rainMax)
         .chartYAxis { yAxis(geo) }
         .chartXAxis { xAxis }
         .chartYAxis(showRain || showTemp ? .automatic : .hidden)
@@ -67,20 +67,18 @@ struct DayChart: View {
 
     @ChartContentBuilder
     private var rainBars: some ChartContent {
-        // Witte halo achter de bar (bredere bar) + gekleurde bar ervoor,
-        // benadert de witte rand rond de regen-bars uit de PWA.
+        // Eén blauwe bar met afgeronde top. (Geen witte halo-bar meer: die werd
+        // rondom afgerond en piepte onderaan uit als witte nub; het onder de
+        // nullijn beginnen om dat weg te kappen tekende de bar juist ónder de as.)
         ForEach(Array(hours.enumerated()), id: \.offset) { _, hour in
             if hour.precipitationMm > 0 {
-                BarMark(x: .value("tijd", hour.time), y: .value("mm", min(hour.precipitationMm, maxMM)), width: .fixed(20))
-                    .foregroundStyle(.white)
-                    .cornerRadius(6)
-            }
-        }
-        ForEach(Array(hours.enumerated()), id: \.offset) { _, hour in
-            if hour.precipitationMm > 0 {
-                BarMark(x: .value("tijd", hour.time), y: .value("mm", min(hour.precipitationMm, maxMM)), width: .fixed(16))
-                    .foregroundStyle(Tokens.rain)
-                    .cornerRadius(5)
+                BarMark(
+                    x: .value("tijd", hour.time),
+                    y: .value("mm", hour.precipitationMm),
+                    width: .fixed(16)
+                )
+                .foregroundStyle(Tokens.rain)
+                .cornerRadius(4)
             }
         }
     }
@@ -108,7 +106,7 @@ struct DayChart: View {
 
     @AxisContentBuilder
     private func yAxis(_ geo: ChartGeometry) -> some AxisContent {
-        AxisMarks(position: .leading, values: [0, 1, 2, 3]) { value in
+        AxisMarks(position: .leading, values: geo.rainTicks) { value in
             if showRain {
                 AxisValueLabel {
                     if let v = value.as(Double.self) {
@@ -243,7 +241,7 @@ private struct ChartNowLine: View {
         let kinds: [WeatherKind] = [.cloud, .cloud, .cloud, .cloud, .partly, .sun, .sun, .partly, .partly, .cloud, .cloud, .cloud]
         let kind = kinds[i]
         let isDay = h >= 6 && h <= 21
-        let precip = i == 3 ? 0.6 : (i == 9 ? 1.2 : 0)
+        let precip = i == 3 ? 0.6 : (i == 9 ? 5.4 : 0)
         let temp = 16.0 + Double(i)
         return HourlyWeather(
             isoTime: iso,

@@ -20,8 +20,11 @@ struct DayCarousel: View {
     // detailweergaves +6/+2 krijgt elk paneel z'n eigen, losgekoppelde as.
     private func geometry(for day: DayOption) -> ChartGeometry {
         if model.selectedHorizon == .heleDag {
-            let range = ChartGeometry.temperatureRange(across: DayOption.allCases.map(hours(for:)))
-            return ChartGeometry(temperatureRange: range)
+            let all = DayOption.allCases.map(hours(for:))
+            return ChartGeometry(
+                temperatureRange: ChartGeometry.temperatureRange(across: all),
+                precipitationMax: ChartGeometry.precipitationMax(across: all)
+            )
         }
         return ChartGeometry(hours: hours(for: day))
     }
