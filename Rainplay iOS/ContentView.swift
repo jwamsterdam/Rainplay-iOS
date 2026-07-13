@@ -8,17 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Bindable var model: AppModel
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        WeatherScreen(model: model)
+            // Laat tekst meeschalen met de Dynamic Type-voorkeur, maar begrens de
+            // bovenkant zodat het pixel-getunede hero-ontwerp niet uit elkaar valt.
+            .dynamicTypeSize(.xSmall ... .accessibility1)
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(model: AppModel())
 }
