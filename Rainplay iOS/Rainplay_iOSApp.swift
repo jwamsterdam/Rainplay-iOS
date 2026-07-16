@@ -8,8 +8,7 @@
 import SwiftUI
 
 // swiftlint:disable:next type_name
-@main
-struct Rainplay_iOSApp: App { // Xcode-generated @main name; underscore is intentional
+@main struct Rainplay_iOSApp: App { // Xcode-generated @main name; underscore is intentional
     @State private var model = AppModel()
     @Environment(\.scenePhase) private var scenePhase
 
