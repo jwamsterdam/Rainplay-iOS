@@ -174,7 +174,12 @@ private func dateForDayOption(_ hours: [HourlyWeather], _ day: DayOption) -> Str
     let components = DateComponents(year: parts[0], month: parts[1], day: parts[2])
     guard let base = calendar.date(from: components) else { return nil }
 
-    let offset = day == .vandaag ? 0 : day == .morgen ? 1 : 2
+    let offset: Int
+    switch day {
+    case .morgen: offset = 1
+    case .overmorgen: offset = 2
+    default: offset = 0
+    }
     guard let date = calendar.date(byAdding: .day, value: offset, to: base) else { return nil }
 
     let result = calendar.dateComponents([.year, .month, .day], from: date)
@@ -264,14 +269,16 @@ private func summarizeDay(_ date: String, _ dayHours: [HourlyWeather]) -> Hourly
     summary.cloudCover = averageCloudCover
     summary.radiation = averageRadiation
     summary.isDay = Double(daytimeHours) >= Double(dayHours.count) / 2
-    summary.kind = rainyHours >= 3
-        ? .rain
-        : sunnyHours >= partlyHours && sunnyHours > 0
-            ? .sun
-            : partlyHours > 0
-                ? .partly
-                : .cloud
+    summary.kind = dominantKind(rainyHours: rainyHours, sunnyHours: sunnyHours, partlyHours: partlyHours)
     return summary
+}
+
+// Bepaalt het dag-icoon uit de telling per soort uur, in prioriteitsvolgorde.
+private func dominantKind(rainyHours: Int, sunnyHours: Int, partlyHours: Int) -> WeatherKind {
+    if rainyHours >= 3 { return .rain }
+    if sunnyHours >= partlyHours && sunnyHours > 0 { return .sun }
+    if partlyHours > 0 { return .partly }
+    return .cloud
 }
 
 private func average(_ values: [Double]) -> Double {

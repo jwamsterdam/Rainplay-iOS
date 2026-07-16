@@ -72,7 +72,9 @@ struct AppModelFetchTests {
     // meteen "resolved" is en één keer laadt — zonder GPS.
     private func seededDefaults(_ location: ForecastLocation) -> UserDefaults {
         let d = defaults()
-        d.set(try! JSONEncoder().encode(location), forKey: "rainplay.selectedLocation")
+        if let encoded = try? JSONEncoder().encode(location) {
+            d.set(encoded, forKey: "rainplay.selectedLocation")
+        }
         return d
     }
 
@@ -209,7 +211,7 @@ struct AppModelFetchTests {
         await model.start()
         await waitUntil { model.forecast != nil }
 
-        #expect(model.selectedLocation.source == .default)         // valt terug op Haarlem
+        #expect(model.selectedLocation.source == .fallback)        // valt terug op Haarlem
         #expect(log.count == 1)
     }
 }

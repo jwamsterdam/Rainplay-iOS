@@ -49,47 +49,24 @@ struct HourlyWeather: Equatable {
     var temperatureC: Double
     var score: Int
     var precipitationMm: Double
-    var precipitationProbability: Double
-    var cloudCover: Double
-    var radiation: Double
-    var isDay: Bool
-    var kind: WeatherKind
+    // Defaults op de properties zelf, zodat de gesynthetiseerde memberwise-init
+    // deze velden optioneel maakt zonder een handgeschreven initializer.
+    var precipitationProbability: Double = 0
+    var cloudCover: Double = 0
+    var radiation: Double = 0
+    var isDay: Bool = true
+    var kind: WeatherKind = .cloud
     // Unix-timestamp (ms) van zonsondergang op dezelfde kalenderdag, voor de
     // civiele-schemering-falloff in de lucht-gradient. Optioneel zodat
     // testfixtures compact blijven.
-    var sunsetMs: Double?
-
-    init(
-        isoTime: String,
-        time: String,
-        temperatureC: Double,
-        score: Int,
-        precipitationMm: Double,
-        precipitationProbability: Double = 0,
-        cloudCover: Double = 0,
-        radiation: Double = 0,
-        isDay: Bool = true,
-        kind: WeatherKind = .cloud,
-        sunsetMs: Double? = nil
-    ) {
-        self.isoTime = isoTime
-        self.time = time
-        self.temperatureC = temperatureC
-        self.score = score
-        self.precipitationMm = precipitationMm
-        self.precipitationProbability = precipitationProbability
-        self.cloudCover = cloudCover
-        self.radiation = radiation
-        self.isDay = isDay
-        self.kind = kind
-        self.sunsetMs = sunsetMs
-    }
+    var sunsetMs: Double? = nil
 }
 
 typealias ForecastPoint = HourlyWeather
 
 enum LocationSource: String, Codable {
-    case `default`
+    // Raw value blijft "default" zodat reeds opgeslagen locaties blijven decoderen.
+    case fallback = "default"
     case gps
     case manual
 }
@@ -117,7 +94,7 @@ struct ForecastLocation: Codable, Equatable {
         name: "Haarlem",
         latitude: 52.3948,
         longitude: 4.6382,
-        source: .default
+        source: .fallback
     )
 }
 

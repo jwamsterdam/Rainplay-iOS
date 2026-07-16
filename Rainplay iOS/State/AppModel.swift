@@ -136,7 +136,7 @@ final class AppModel {
     func start() async {
         guard !locationResolved else { return }
 
-        if selectedLocation.source == .default {
+        if selectedLocation.source == .fallback {
             // refreshLocation() zet selectedLocation en triggert dáár al een
             // fetch; locationResolved eerst zetten voorkomt een dubbele.
             locationResolved = true

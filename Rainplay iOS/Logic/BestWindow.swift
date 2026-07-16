@@ -75,15 +75,10 @@ func bestOutdoorWindow(_ hours: [HourlyWeather]) -> OutdoorWindow? {
     }
     let scoreOnlyWindows = contiguousWindows(hours) { hour in hour.score >= bestScore }
 
-    let windows = !brightWindows.isEmpty
-        ? brightWindows
-        : !practicalPreferredWindows.isEmpty
-            ? practicalPreferredWindows
-            : !preferredWindows.isEmpty
-                ? preferredWindows
-                : !fallbackWindows.isEmpty
-                    ? fallbackWindows
-                    : scoreOnlyWindows
+    // Kies de eerste niet-lege kandidatenlijst in prioriteitsvolgorde; valt
+    // terug op score-only als alle voorkeurslijsten leeg zijn.
+    let windows = [brightWindows, practicalPreferredWindows, preferredWindows, fallbackWindows]
+        .first { !$0.isEmpty } ?? scoreOnlyWindows
 
     guard let first = windows.first else { return nil }
 

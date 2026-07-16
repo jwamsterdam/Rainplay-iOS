@@ -35,37 +35,37 @@ private struct OpenMeteoResponse: Decodable {
     }
 
     struct Current: Decodable {
-        let temperature_2m: Double
+        let temperature2m: Double
     }
 
-    // Alleen `time` en `temperature_2m` zijn hard vereist; de rest is optioneel
+    // Alleen `time` en `temperature2m` zijn hard vereist; de rest is optioneel
     // zodat een geldige respons waarin Open-Meteo één veld weglaat (komt voor bij
     // bepaalde modellen/locaties) niet de héle decode laat falen. numberAt vult
     // een ontbrekend veld met de fallback 0 — net als de Zod-tolerantie in de PWA.
     struct Hourly: Decodable {
         let time: [String]
-        let temperature_2m: [Double]
+        let temperature2m: [Double]
         let precipitation: [Double]?
-        let precipitation_probability: [Double]?
-        let cloud_cover: [Double]?
-        let shortwave_radiation: [Double]?
-        let weather_code: [Double]?
-        let is_day: [Double]?
+        let precipitationProbability: [Double]?
+        let cloudCover: [Double]?
+        let shortwaveRadiation: [Double]?
+        let weatherCode: [Double]?
+        let isDay: [Double]?
     }
 
     struct Minutely15: Decodable {
         let time: [String]
         let precipitation: [Double]?
-        let weather_code: [Double]?
-        let cloud_cover: [Double]?
-        let shortwave_radiation: [Double]?
-        let is_day: [Double]?
+        let weatherCode: [Double]?
+        let cloudCover: [Double]?
+        let shortwaveRadiation: [Double]?
+        let isDay: [Double]?
     }
 
     let daily: Daily
     let current: Current
     let hourly: Hourly
-    let minutely_15: Minutely15?
+    let minutely15: Minutely15?
 }
 
 // MARK: - Client
@@ -126,7 +126,12 @@ func fetchOpenMeteoForecast(_ location: ForecastLocation) async throws -> Foreca
 func makeForecast(from data: Data) throws -> Forecast {
     let decoded: OpenMeteoResponse
     do {
-        decoded = try JSONDecoder().decode(OpenMeteoResponse.self, from: data)
+        let decoder = JSONDecoder()
+        // Open-Meteo levert snake_case-velden (temperature_2m, cloud_cover, …);
+        // deze strategie mapt die op de camelCase-properties hierboven, zodat de
+        // wire-namen ongewijzigd blijven maar de Swift-kant idiomatisch is.
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoded = try decoder.decode(OpenMeteoResponse.self, from: data)
     } catch {
         // Bewaar de echte decode-reden in de log; de UI ziet alleen de nette fout.
         AppLog.network.error("Open-Meteo decode mislukt: \(error.localizedDescription, privacy: .public)")
@@ -149,11 +154,11 @@ func makeForecast(from data: Data) throws -> Forecast {
     }
 
     return Forecast(
-        currentTemperature: Int(decoded.current.temperature_2m.rounded()),
+        currentTemperature: Int(decoded.current.temperature2m.rounded()),
         hourly: decoded.hourly.time.enumerated().map { index, time in
             toHourlyWeather(decoded, index: index, isoTime: time, sunsetMsByDate: sunsetMsByDate)
         },
-        minutely15: decoded.minutely_15.map { minutely in
+        minutely15: decoded.minutely15.map { minutely in
             minutely.time.enumerated().map { index, time in
                 toMinutelyWeather(decoded, minutely: minutely, index: index, isoTime: time,
                                   hourlyMs: hourlyMs, sunsetMsByDate: sunsetMsByDate)
@@ -173,12 +178,12 @@ private func sunsetMsFor(_ isoTime: String, _ sunsetMsByDate: [String: Double]) 
 
 private func toHourlyWeather(_ data: OpenMeteoResponse, index: Int, isoTime: String, sunsetMsByDate: [String: Double]) -> HourlyWeather {
     let precipitationMm = numberAt(data.hourly.precipitation ?? [], index)
-    let precipitationProbability = numberAt(data.hourly.precipitation_probability ?? [], index)
-    let cloudCover = numberAt(data.hourly.cloud_cover ?? [], index)
-    let radiation = numberAt(data.hourly.shortwave_radiation ?? [], index)
-    let temperatureC = numberAt(data.hourly.temperature_2m, index)
-    let weatherCode = numberAt(data.hourly.weather_code ?? [], index)
-    let isDay = numberAt(data.hourly.is_day ?? [], index) == 1
+    let precipitationProbability = numberAt(data.hourly.precipitationProbability ?? [], index)
+    let cloudCover = numberAt(data.hourly.cloudCover ?? [], index)
+    let radiation = numberAt(data.hourly.shortwaveRadiation ?? [], index)
+    let temperatureC = numberAt(data.hourly.temperature2m, index)
+    let weatherCode = numberAt(data.hourly.weatherCode ?? [], index)
+    let isDay = numberAt(data.hourly.isDay ?? [], index) == 1
     let kind = weatherKind(
         weatherCode: weatherCode,
         precipitationMm: precipitationMm,
@@ -213,12 +218,12 @@ private func toMinutelyWeather(
     // Temperatuur en regenkans bestaan niet per kwartier; neem het dichtstbijzijnde uur.
     let nearestHourlyIndex = nearestHourlyIndexFor(hourlyMs, targetMs: IsoTime.ms(isoTime))
     let precipitationMm = numberAt(minutely.precipitation ?? [], index)
-    let cloudCover = numberAt(minutely.cloud_cover ?? [], index)
-    let radiation = numberAt(minutely.shortwave_radiation ?? [], index)
-    let weatherCode = numberAt(minutely.weather_code ?? [], index)
-    let isDay = numberAt(minutely.is_day ?? [], index) == 1
-    let precipitationProbability = numberAt(data.hourly.precipitation_probability ?? [], nearestHourlyIndex)
-    let temperatureC = numberAt(data.hourly.temperature_2m, nearestHourlyIndex)
+    let cloudCover = numberAt(minutely.cloudCover ?? [], index)
+    let radiation = numberAt(minutely.shortwaveRadiation ?? [], index)
+    let weatherCode = numberAt(minutely.weatherCode ?? [], index)
+    let isDay = numberAt(minutely.isDay ?? [], index) == 1
+    let precipitationProbability = numberAt(data.hourly.precipitationProbability ?? [], nearestHourlyIndex)
+    let temperatureC = numberAt(data.hourly.temperature2m, nearestHourlyIndex)
     let kind = weatherKind(
         weatherCode: weatherCode,
         precipitationMm: precipitationMm,

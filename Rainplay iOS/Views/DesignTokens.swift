@@ -9,14 +9,16 @@ extension Color {
         let cleaned = hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
         var value: UInt64 = 0
         Scanner(string: cleaned).scanHexInt64(&value)
-        let r, g, b, a: Double
-        switch cleaned.count {
-        case 8:
+        let r: Double
+        let g: Double
+        let b: Double
+        let a: Double
+        if cleaned.count == 8 {
             r = Double((value >> 24) & 0xff) / 255
             g = Double((value >> 16) & 0xff) / 255
             b = Double((value >> 8) & 0xff) / 255
             a = Double(value & 0xff) / 255
-        default:
+        } else {
             r = Double((value >> 16) & 0xff) / 255
             g = Double((value >> 8) & 0xff) / 255
             b = Double(value & 0xff) / 255
