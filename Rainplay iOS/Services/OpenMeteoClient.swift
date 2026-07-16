@@ -36,6 +36,10 @@ private struct OpenMeteoResponse: Decodable {
 
     struct Current: Decodable {
         let temperature2m: Double
+
+        enum CodingKeys: String, CodingKey {
+            case temperature2m = "temperature_2m"
+        }
     }
 
     // Alleen `time` en `temperature2m` zijn hard vereist; de rest is optioneel
@@ -51,6 +55,17 @@ private struct OpenMeteoResponse: Decodable {
         let shortwaveRadiation: [Double]?
         let weatherCode: [Double]?
         let isDay: [Double]?
+
+        enum CodingKeys: String, CodingKey {
+            case time
+            case temperature2m = "temperature_2m"
+            case precipitation
+            case precipitationProbability = "precipitation_probability"
+            case cloudCover = "cloud_cover"
+            case shortwaveRadiation = "shortwave_radiation"
+            case weatherCode = "weather_code"
+            case isDay = "is_day"
+        }
     }
 
     struct Minutely15: Decodable {
@@ -60,12 +75,28 @@ private struct OpenMeteoResponse: Decodable {
         let cloudCover: [Double]?
         let shortwaveRadiation: [Double]?
         let isDay: [Double]?
+
+        enum CodingKeys: String, CodingKey {
+            case time
+            case precipitation
+            case weatherCode = "weather_code"
+            case cloudCover = "cloud_cover"
+            case shortwaveRadiation = "shortwave_radiation"
+            case isDay = "is_day"
+        }
     }
 
     let daily: Daily
     let current: Current
     let hourly: Hourly
     let minutely15: Minutely15?
+
+    enum CodingKeys: String, CodingKey {
+        case daily
+        case current
+        case hourly
+        case minutely15 = "minutely_15"
+    }
 }
 
 // MARK: - Client
@@ -126,12 +157,11 @@ func fetchOpenMeteoForecast(_ location: ForecastLocation) async throws -> Foreca
 func makeForecast(from data: Data) throws -> Forecast {
     let decoded: OpenMeteoResponse
     do {
-        let decoder = JSONDecoder()
-        // Open-Meteo levert snake_case-velden (temperature_2m, cloud_cover, …);
-        // deze strategie mapt die op de camelCase-properties hierboven, zodat de
-        // wire-namen ongewijzigd blijven maar de Swift-kant idiomatisch is.
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        decoded = try decoder.decode(OpenMeteoResponse.self, from: data)
+        // Open-Meteo levert snake_case-velden; de expliciete CodingKeys op de
+        // structs hierboven mappen die op de camelCase-properties (betrouwbaarder
+        // dan .convertFromSnakeCase, dat `temperature_2m` niet op `temperature2m`
+        // mapt).
+        decoded = try JSONDecoder().decode(OpenMeteoResponse.self, from: data)
     } catch {
         // Bewaar de echte decode-reden in de log; de UI ziet alleen de nette fout.
         AppLog.network.error("Open-Meteo decode mislukt: \(error.localizedDescription, privacy: .public)")
