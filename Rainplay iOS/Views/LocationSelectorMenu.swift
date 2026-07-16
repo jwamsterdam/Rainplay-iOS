@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // Locatiekiezer (src/components/LocationSelector.tsx). Native sheet met de
 // huidige-locatie-rij (GPS), opgeslagen locaties (met verwijderknop voor
@@ -6,6 +7,8 @@ import SwiftUI
 struct LocationSelectorMenu: View {
     @Bindable var model: AppModel
     @Binding var isPresented: Bool
+
+    @Environment(\.openURL) private var openURL
 
     @State private var query = ""
     @State private var suggestions: [ForecastLocation] = []
@@ -21,6 +24,9 @@ struct LocationSelectorMenu: View {
             List {
                 Section {
                     currentLocationRow
+                    if model.locationService.status == .denied {
+                        locationDeniedRow
+                    }
                 }
 
                 if !model.savedLocations.isEmpty {
@@ -70,8 +76,13 @@ struct LocationSelectorMenu: View {
     private var currentLocationRow: some View {
         Button {
             Task {
-                _ = try? await model.refreshLocation()
-                isPresented = false
+                do {
+                    _ = try await model.refreshLocation()
+                    isPresented = false
+                } catch {
+                    // Blijf open; status is nu .denied → locationDeniedRow toont
+                    // een uitleg met een knop naar Instellingen.
+                }
             }
         } label: {
             HStack {
@@ -90,6 +101,23 @@ struct LocationSelectorMenu: View {
             }
         }
         .disabled(model.locationService.status == .locating)
+    }
+
+    // Getoond na een geweigerde locatie-aanvraag: kalme uitleg + directe knop
+    // naar de systeeminstellingen (App Review test dit pad expliciet).
+    private var locationDeniedRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Geen toegang tot je locatie. Zet locatietoegang aan in Instellingen om je huidige plek te gebruiken.")
+                .font(.system(size: 13))
+                .foregroundStyle(Tokens.inkMuted)
+            Button("Open Instellingen") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(url)
+                }
+            }
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(Tokens.accent)
+        }
     }
 
     private func savedRow(_ location: ForecastLocation) -> some View {

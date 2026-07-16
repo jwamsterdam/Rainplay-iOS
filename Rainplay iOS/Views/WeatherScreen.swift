@@ -111,11 +111,15 @@ struct WeatherScreen: View {
                     .font(.system(size: 96, weight: .semibold))
                     .foregroundStyle(Tokens.inkStrong)
                     .accessibilityLabel(summary.temperature.map { "\($0) graden" } ?? "Temperatuur onbekend")
-                Text("Buiten vanaf \(summary.bestStartTime)")
-                    .font(.system(size: 30, weight: .heavy))
-                    .foregroundStyle(Tokens.inkStrong)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                // Alleen tonen wanneer er een echt venster is; bij lege/mislukte
+                // data draagt summaryLabel de boodschap i.p.v. "Buiten vanaf --:--".
+                if summary.bestStartTime != "--:--" {
+                    Text("Buiten vanaf \(summary.bestStartTime)")
+                        .font(.system(size: 30, weight: .heavy))
+                        .foregroundStyle(Tokens.inkStrong)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                }
                 Text(summary.summaryLabel)
                     .font(.system(size: 18, weight: .regular))
                     .foregroundStyle(Tokens.heroSubtitle)
@@ -151,7 +155,7 @@ struct WeatherScreen: View {
             .padding(.horizontal, 8)
             .padding(.top, 5)
 
-            Text("Weather data by Open-Meteo")
+            Link("Weather data by Open-Meteo", destination: URL(string: "https://open-meteo.com")!)
                 .font(.system(size: 12))
                 .foregroundStyle(Tokens.inkSoft)
                 .padding(.top, 14)
