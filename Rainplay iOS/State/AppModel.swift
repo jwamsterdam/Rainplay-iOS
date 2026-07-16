@@ -136,6 +136,15 @@ final class AppModel {
     func start() async {
         guard !locationResolved else { return }
 
+        // UI tests launch with this argument to skip the CoreLocation permission
+        // prompt (which would block automation on a clean simulator); fall back
+        // to the stored/default location and just load.
+        if ProcessInfo.processInfo.arguments.contains("-uiTestingSkipLocation") {
+            locationResolved = true
+            await loadForecast()
+            return
+        }
+
         if selectedLocation.source == .fallback {
             // refreshLocation() zet selectedLocation en triggert dáár al een
             // fetch; locationResolved eerst zetten voorkomt een dubbele.

@@ -6,6 +6,7 @@
 included:
   - "Rainplay iOS"
   - "Rainplay iOSTests"
+  - "Rainplay iOSUITests"
 
 excluded:
   - "Rainplay iOS/Assets.xcassets"

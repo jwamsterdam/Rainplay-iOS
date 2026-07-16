@@ -43,6 +43,8 @@ struct SegmentedControl<Option: Identifiable & Equatable>: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(disabled)
+                // Exposes the active segment to VoiceOver and UI tests.
+                .accessibilityAddTraits(isActive ? .isSelected : [])
             }
         }
         .padding(3)
