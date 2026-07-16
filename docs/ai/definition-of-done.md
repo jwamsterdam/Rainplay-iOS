@@ -11,14 +11,20 @@ silently skip it.
   bad coordinates, network timeout/offline, out-of-range windows).
 - User-facing copy stays Dutch, calm, and fits narrow iPhone screens.
 
-## 2. Build
+## 2. Build & linters
 - The project builds cleanly for the iOS Simulator (Xcode `BuildProject`, or
   `xcodebuild build`), with no new warnings introduced by the change.
+- **SwiftLint reports no violations** on the change (`swiftlint lint --quiet`).
+- **SwiftFormat lint is clean** on the change (`swiftformat --lint .`).
+- Both run as Xcode build-phase warnings; autofix with `swiftlint --fix` and
+  `swiftformat .`. Config lives in `.swiftlint.yml` and `.swiftformat`.
 
 ## 3. Tests
 - New or changed domain logic (`Logic/`), mappers (`Services/`), and state has
   behavior-oriented tests (Swift Testing framework).
-- The full test suite passes (Xcode ⌘U or `xcodebuild test`).
+- The full test suite passes (Xcode ⌘U or `xcodebuild test`). CI
+  (`.github/workflows/ci.yml`) runs lint + the full suite on every push/PR to
+  `main`; that run must be green.
 - No test was weakened or deleted to make the suite pass; any corrected
   assertion is explained.
 
@@ -59,6 +65,7 @@ silently skip it.
 Done requires, at minimum:
 - tests pass;
 - build is green;
+- SwiftLint and SwiftFormat report no issues on the change;
 - Test Engineer: no blocking issues;
 - Software Architect: no blocking issues;
 - SonarCloud: quality gate green, no new issues, all issues resolved or

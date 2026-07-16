@@ -31,6 +31,7 @@ Implementation rules:
 - Add or update tests (Swift Testing framework) when behavior changes.
 - Build and check your work with the Xcode tooling: use the BuildProject MCP command, and XcodeRefreshCodeIssuesInFile for fast diagnostics.
 - Write code that introduces no new SonarCloud issues; ensure issues on the change are resolved or explicitly accepted (see docs/ai/definition-of-done.md).
+- Keep SwiftLint and SwiftFormat clean (autofix with `swiftlint --fix` and `swiftformat .`; configs in `.swiftlint.yml` / `.swiftformat`).
 
 Output format:
 1. Summary of implementation.
