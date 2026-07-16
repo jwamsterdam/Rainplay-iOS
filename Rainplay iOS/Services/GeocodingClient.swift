@@ -76,5 +76,5 @@ func searchLocations(_ query: String) async throws -> [ForecastLocation] {
 }
 
 func roundCoordinate(_ value: Double) -> Double {
-    (value * 10_000).rounded() / 10_000
+    (value * 10000).rounded() / 10000
 }

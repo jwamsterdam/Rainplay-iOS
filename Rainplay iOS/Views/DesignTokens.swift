@@ -14,14 +14,14 @@ extension Color {
         let b: Double
         let a: Double
         if cleaned.count == 8 {
-            r = Double((value >> 24) & 0xff) / 255
-            g = Double((value >> 16) & 0xff) / 255
-            b = Double((value >> 8) & 0xff) / 255
-            a = Double(value & 0xff) / 255
+            r = Double((value >> 24) & 0xFF) / 255
+            g = Double((value >> 16) & 0xFF) / 255
+            b = Double((value >> 8) & 0xFF) / 255
+            a = Double(value & 0xFF) / 255
         } else {
-            r = Double((value >> 16) & 0xff) / 255
-            g = Double((value >> 8) & 0xff) / 255
-            b = Double(value & 0xff) / 255
+            r = Double((value >> 16) & 0xFF) / 255
+            g = Double((value >> 8) & 0xFF) / 255
+            b = Double(value & 0xFF) / 255
             a = 1
         }
         self.init(.sRGB, red: r, green: g, blue: b, opacity: a)

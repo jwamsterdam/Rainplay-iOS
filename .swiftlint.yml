@@ -1,0 +1,45 @@
+# SwiftLint configuration for Rainplay iOS.
+# Fast local feedback in Xcode; complements (does not replace) SonarCloud.
+# Autofix what it can:  swiftlint --fix
+
+included:
+  - "Rainplay iOS"
+  - "Rainplay iOSTests"
+
+excluded:
+  - "Rainplay iOS/Assets.xcassets"
+  - "**/.build"
+  - "DerivedData"
+
+opt_in_rules:
+  - closure_spacing
+  - contains_over_first_not_nil
+  - empty_count
+  - explicit_init
+  - first_where
+  - redundant_nil_coalescing
+  - toggle_bool
+  - unused_import
+  - vertical_whitespace_closing_braces
+
+line_length:
+  warning: 140
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+
+# The codebase uses short, conventional locals (r, g, b, a, i, d); don't flag them.
+identifier_name:
+  min_length:
+    warning: 1
+    error: 1
+
+type_name:
+  max_length:
+    warning: 50
+    error: 60
+
+# Kept calm on purpose: these fire a lot on SwiftUI/view code without adding value here.
+disabled_rules:
+  - todo
+  - trailing_comma

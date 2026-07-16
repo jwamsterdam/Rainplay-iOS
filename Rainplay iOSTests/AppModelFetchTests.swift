@@ -1,6 +1,6 @@
-import Testing
 import Foundation
 @testable import Rainplay_iOS
+import Testing
 
 // Tests voor het fetch-beleid van AppModel: 5-min-versheid, meeliften op een
 // lopende load, annuleren-bij-locatiewissel (de generatie-guard), retry/back-off,

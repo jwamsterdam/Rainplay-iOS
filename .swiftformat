@@ -1,0 +1,17 @@
+# SwiftFormat configuration for Rainplay iOS.
+# The Xcode build phase runs this in --lint --lenient mode (warnings only, never
+# rewrites on build). Apply formatting manually with:  swiftformat .
+#
+# Deliberately a curated allow-list (via --rules): the codebase is hand-styled
+# (aligned Dutch comments, concise one-line ifs, explicit returns), and
+# SwiftFormat's full default set fights that and would produce a huge churn diff.
+# We enable only safe, low-churn, semantics-preserving hygiene rules here.
+# NOTE: redundantNilInit is intentionally NOT enabled — it would strip `= nil`
+# from optional properties that rely on it for the synthesized memberwise init.
+
+--swiftversion 6.0
+
+--rules sortImports,duplicateImports,numberFormatting,trailingSpace,consecutiveBlankLines,blankLinesAtStartOfScope,blankLinesAtEndOfScope,linebreakAtEndOfFile,emptyBraces,redundantParens,redundantGet,spaceInsideBrackets,spaceInsideParens
+
+# Exclude generated / non-source paths.
+--exclude **/.build,DerivedData,**/*.xcassets

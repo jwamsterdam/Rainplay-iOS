@@ -1,6 +1,6 @@
-import Testing
 import Foundation
 @testable import Rainplay_iOS
+import Testing
 
 // Decode + normalisatie van een Open-Meteo-respons naar het interne model,
 // getest met JSON-fixtures (geen netwerk).

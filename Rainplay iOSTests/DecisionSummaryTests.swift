@@ -1,6 +1,6 @@
-import Testing
 import Foundation
 @testable import Rainplay_iOS
+import Testing
 
 // Tests voor de afgeleide kop-informatie (temperatuur, beste-moment, adviesteksten).
 struct DecisionSummaryTests {

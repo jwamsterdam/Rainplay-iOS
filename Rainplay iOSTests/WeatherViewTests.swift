@@ -1,6 +1,6 @@
-import Testing
 import Foundation
 @testable import Rainplay_iOS
+import Testing
 
 // Port van src/lib/weatherView.test.ts + weatherView.todayHorizon.test.ts.
 struct WeatherViewTests {

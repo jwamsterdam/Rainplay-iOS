@@ -1,5 +1,5 @@
-import Testing
 @testable import Rainplay_iOS
+import Testing
 
 // Port van src/lib/outdoorScore.test.ts uit de PWA.
 struct OutdoorScoreTests {

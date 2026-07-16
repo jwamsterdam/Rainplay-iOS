@@ -1,5 +1,5 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 // De gecombineerde weer-grafiek (src/components/DayChartRecharts.tsx), gebouwd
 // met native Swift Charts: regen-bars, temperatuurlijn met tweede as,

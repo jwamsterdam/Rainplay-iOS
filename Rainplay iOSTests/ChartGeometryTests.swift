@@ -1,6 +1,6 @@
-import Testing
 import Foundation
 @testable import Rainplay_iOS
+import Testing
 
 // De dubbele-as-geometrie (temperatuur ↔ regen-domein).
 struct ChartGeometryTests {

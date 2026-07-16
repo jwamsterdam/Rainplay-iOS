@@ -1,5 +1,5 @@
-import Testing
 @testable import Rainplay_iOS
+import Testing
 
 // Grenzen van de uur-classificatie (stuurt score, gradient én iconen aan).
 struct WeatherClassificationTests {
