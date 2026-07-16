@@ -10,22 +10,17 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Lint-only CI. Build & test are intentionally NOT run here: the project is
+# developed in Xcode 27 (project format 110), which GitHub-hosted runners
+# (Xcode 26.6) cannot open. Run the unit + UI test suites locally with Xcode ⌘U
+# until GitHub runners ship Xcode 27, then restore the build/test job (see git
+# history for commit 80489c3).
 jobs:
-  build-test:
-    name: Lint, build & test
+  lint:
+    name: Lint
     runs-on: macos-latest
-    env:
-      PROJECT: "Rainplay iOS.xcodeproj"
-      SCHEME: "Rainplay iOS"
     steps:
       - uses: actions/checkout@v4
-
-      - name: Select latest Xcode
-        run: |
-          LATEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
-          echo "Using $LATEST"
-          sudo xcode-select -s "$LATEST"
-          xcodebuild -version
 
       - name: Install SwiftLint & SwiftFormat
         run: brew install swiftlint swiftformat
@@ -35,35 +30,3 @@ jobs:
 
       - name: SwiftFormat (lint)
         run: swiftformat --lint .
-
-      - name: Pick a simulator
-        id: sim
-        run: |
-          DEVICE=$(xcrun simctl list devices available \
-            | awk -F'[()]' '/iPhone/ { gsub(/^ +| +$/, "", $1); print $1; exit }')
-          echo "Using simulator: $DEVICE"
-          echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
-
-      - name: Build & test
-        run: |
-          set -o pipefail
-          xcodebuild test \
-            -project "$PROJECT" \
-            -scheme "$SCHEME" \
-            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
-            -resultBundlePath TestResults.xcresult \
-            CODE_SIGNING_ALLOWED=NO \
-            | tee xcodebuild.log
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: TestResults
-          path: TestResults.xcresult
-          if-no-files-found: ignore
-
-# Optional follow-up — feed coverage to SonarCloud:
-#   Requires switching the project from Automatic Analysis to CI-based analysis,
-#   adding a SONAR_TOKEN GitHub secret, converting xccov output to the SonarQube
-#   generic coverage format, and running sonar-scanner here. Not enabled yet.

@@ -22,9 +22,11 @@ silently skip it.
 ## 3. Tests
 - New or changed domain logic (`Logic/`), mappers (`Services/`), and state has
   behavior-oriented tests (Swift Testing framework).
-- The full test suite passes (Xcode ⌘U or `xcodebuild test`). CI
-  (`.github/workflows/ci.yml`) runs lint + the full suite on every push/PR to
-  `main`; that run must be green.
+- The full test suite passes **locally** (Xcode ⌘U or `xcodebuild test`) — this
+  is required before a change is done. CI (`.github/workflows/ci.yml`) is
+  **lint-only** (SwiftLint + SwiftFormat) because GitHub runners can't open the
+  Xcode 27 project format; it does not run the suite, so the local run is the
+  gate. That CI run must still be green.
 - No test was weakened or deleted to make the suite pass; any corrected
   assertion is explained.
 
