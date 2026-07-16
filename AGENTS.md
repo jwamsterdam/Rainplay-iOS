@@ -34,6 +34,7 @@ This is a **native SwiftUI app for iOS/iPhone**, ported from an earlier React/Ty
 ## Source of truth
 
 Before making changes, read:
+- docs/ai/definition-of-done.md
 - docs/ai/coding-standards.md
 - docs/ai/testing-conventions.md
 - docs/ai/architecture-principles.md
@@ -49,13 +50,16 @@ Use three roles when the task is more than a trivial one-line change:
 
 ## Quality gate
 
-A change is not done until:
+A change is not done until every applicable item in docs/ai/definition-of-done.md
+is satisfied. In summary:
 - relevant tests pass;
+- the project builds cleanly via `BuildProject`;
 - the Test Engineer gives no blocking issues;
 - the Software Architect gives no blocking issues;
+- SonarCloud: quality gate is green, the change adds no new issues, and all
+  issues are resolved in code or explicitly accepted/won't-fixed with a reason;
 - any new dependency is justified and accepted;
-- the project builds cleanly via `BuildProject`;
-- the final response lists changed files, commands run, known risks, and remaining follow-ups.
+- the final response lists changed files, commands run, SonarCloud status, known risks, and remaining follow-ups.
 
 ## Dependency policy
 
