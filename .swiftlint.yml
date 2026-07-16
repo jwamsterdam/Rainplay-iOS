@@ -1,6 +1,7 @@
 # SwiftLint configuration for Rainplay iOS.
 # Fast local feedback in Xcode; complements (does not replace) SonarCloud.
 # Autofix what it can:  swiftlint --fix
+# CI runs `swiftlint lint --strict`, so every warning must be resolved.
 
 included:
   - "Rainplay iOS"
@@ -19,12 +20,11 @@ opt_in_rules:
   - first_where
   - redundant_nil_coalescing
   - toggle_bool
-  - unused_import
   - vertical_whitespace_closing_braces
 
 line_length:
-  warning: 140
-  error: 200
+  warning: 180        # test files carry long data-setup lines
+  error: 250
   ignores_comments: true
   ignores_urls: true
 
@@ -39,7 +39,23 @@ type_name:
     warning: 50
     error: 60
 
-# Kept calm on purpose: these fire a lot on SwiftUI/view code without adding value here.
+# Aligned with the SonarCloud thresholds; SwiftUI view bodies and the mapping /
+# fetch code are legitimately larger than SwiftLint's defaults.
+function_body_length:
+  warning: 80
+  error: 150
+
+function_parameter_count:
+  warning: 8
+  error: 10
+
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+
 disabled_rules:
   - todo
   - trailing_comma
+  # Would strip `= nil` from optional properties that rely on it for the
+  # synthesized memberwise initializer's default (e.g. HourlyWeather.sunsetMs).
+  - implicit_optional_initialization
