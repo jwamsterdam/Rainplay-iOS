@@ -53,6 +53,12 @@ cyclomatic_complexity:
   warning: 15
   error: 25
 
+# Allow one extra level so CodingKeys can live inside nested DTO structs
+# (e.g. OpenMeteoResponse.Hourly.CodingKeys).
+nesting:
+  type_level:
+    warning: 2
+
 disabled_rules:
   - todo
   - trailing_comma
