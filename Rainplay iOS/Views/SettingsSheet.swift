@@ -20,6 +20,7 @@ struct SettingsSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    temperatureSection
                     layersSection
                     twilightSection
                     Text("Tik op het kleurvlak om de kleur te kiezen. Sleep de schuifregelaar voor de intensiteit.")
@@ -56,6 +57,27 @@ struct SettingsSheet: View {
                     }
                 }
             }
+        }
+    }
+
+    // Temperatuureenheid: "Systeem" leidt de eenheid af uit de regio (VS → °F,
+    // elders → °C); °C/°F forceren de keuze. Zie MeasurementFormatting.
+    private var temperatureSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Temperatuur").font(.system(size: 15, weight: .semibold))
+            SegmentedControl(
+                options: TemperatureUnit.allCases,
+                selection: $model.temperatureUnit,
+                label: temperatureUnitLabel
+            )
+        }
+    }
+
+    private func temperatureUnitLabel(_ unit: TemperatureUnit) -> String {
+        switch unit {
+        case .system: return "Systeem"
+        case .celsius: return "°C"
+        case .fahrenheit: return "°F"
         }
     }
 
