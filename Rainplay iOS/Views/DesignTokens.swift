@@ -78,12 +78,3 @@ func scoreColor(_ score: Int) -> Color {
     if score >= 4 { return Tokens.scoreLow }
     return Tokens.scoreBad
 }
-
-// "08:00" → "8:00" (chartHelpers.ts formatTick); dagnamen blijven ongewijzigd.
-func formatTick(_ t: String) -> String {
-    guard t.contains(":") else { return t }
-    let parts = t.split(separator: ":")
-    let hh = Int(parts.first ?? "0") ?? 0
-    let mm = parts.count > 1 ? String(parts[1]) : "00"
-    return "\(hh):\(mm)"
-}

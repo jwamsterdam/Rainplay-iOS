@@ -39,6 +39,19 @@ struct WeatherScreen: View {
         }
     }
 
+    // Formatteert de canonieke kop-datum via de gekozen datum-notatie; nil bij
+    // ontbrekende data zodat de view het label weglaat.
+    private func headerDateText(_ header: HeaderDate) -> String? {
+        switch header {
+        case .none:
+            return nil
+        case let .single(date):
+            return dateLabel(date: date, style: model.dateFormat)
+        case let .range(from, to):
+            return weekRangeLabel(from: from, to: to, style: model.dateFormat)
+        }
+    }
+
     // MARK: - Hero
 
     private var heroBackground: some View {
@@ -102,8 +115,8 @@ struct WeatherScreen: View {
                 Text(model.selectedDay.rawValue)
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundStyle(Tokens.heroDayLabel)
-                if !summary.dateLabel.isEmpty {
-                    Text(summary.dateLabel)
+                if let dateLabel = headerDateText(summary.headerDate) {
+                    Text(dateLabel)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(Tokens.heroDateLabel)
                 }
@@ -115,8 +128,8 @@ struct WeatherScreen: View {
                         ?? "Temperatuur onbekend")
                 // Alleen tonen wanneer er een echt venster is; bij lege/mislukte
                 // data draagt summaryLabel de boodschap i.p.v. "Buiten vanaf --:--".
-                if summary.bestStartTime != "--:--" {
-                    Text("Buiten vanaf \(summary.bestStartTime)")
+                if let bestStart = summary.bestStart {
+                    Text("Buiten vanaf \(timeString(date: bestStart, format: model.timeFormat))")
                         .font(.system(size: 30, weight: .heavy))
                         .foregroundStyle(Tokens.inkStrong)
                         .lineLimit(1)

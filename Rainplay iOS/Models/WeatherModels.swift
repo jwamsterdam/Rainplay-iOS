@@ -51,11 +51,35 @@ enum TemperatureUnit: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+// Voorkeur voor de tijdnotatie in de UI. Canonieke tijden blijven altijd de
+// lokale ISO-tijd (isoTime); deze keuze werkt alleen op de presentatiegrens
+// (zie TimeFormatting). `.system` volgt de 12/24-uurs-instelling van het apparaat.
+enum TimeFormat: String, Codable, CaseIterable, Identifiable {
+    case system
+    case twelveHour
+    case twentyFourHour
+
+    var id: String { rawValue }
+}
+
+// Voorkeur voor de datumnotatie in de UI. `.system` volgt de locale-volgorde;
+// de expliciete stijlen kiezen tussen wel/geen weekdag. Zie TimeFormatting.
+enum DateStyle: String, Codable, CaseIterable, Identifiable {
+    case system
+    case dayMonth
+    case weekdayDayMonth
+
+    var id: String { rawValue }
+}
+
 struct HourlyWeather: Equatable {
     // Lokale tijd van de locatie zoals Open-Meteo die levert ("2026-07-09T14:00").
     // Bewust een string (net als de PWA) zodat datumfilters op stringprefix werken.
     var isoTime: String
-    // "14:00", of een dagnaam ("ma") in de week-weergave.
+    // Canonieke 24-uurs identiteitsstring ("14:00"), of een dagsleutel
+    // ("2026-07-09") in de week-weergave. Dient als stabiele grafiek-as-categorie
+    // en dag/uur-groepering — NIET om aan de gebruiker te tonen. Voor weergave
+    // formatteren views op basis van isoTime via TimeFormatting.
     var time: String
     var temperatureC: Double
     var score: Int

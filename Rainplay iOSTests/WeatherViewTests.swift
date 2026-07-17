@@ -73,7 +73,10 @@ struct WeatherViewTests {
     @Test func weekSummarisesOnePointPerDay() {
         let selected = visibleHoursForSelection(hours, day: .week, horizon: .heleDag)
         #expect(selected.count == 3)
-        #expect(selected.map(\.time) == ["do", "vr", "za"])
+        // Identiteits-`time` is nu een dagsleutel (uniek per dag); de weekdag
+        // wordt in de view locale-aware uit isoTime geformatteerd.
+        #expect(selected.map(\.time) == ["2026-06-11", "2026-06-12", "2026-06-13"])
+        #expect(selected.map { String($0.isoTime.prefix(10)) } == ["2026-06-11", "2026-06-12", "2026-06-13"])
         #expect(selected[1].kind == .sun)
         #expect(selected[2].kind == .rain)
     }
@@ -146,14 +149,17 @@ struct WeatherViewTests {
         #expect(visibleHoursForSelection(mixed, day: .week, horizon: .heleDag).first?.kind == .partly)
     }
 
-    // MARK: - headerDateLabel
+    // MARK: - headerDate
 
-    @Test func headerLabelsForDaysAndWeek() {
-        #expect(headerDateLabel(hours, day: .vandaag).contains("do"))
-        #expect(headerDateLabel(hours, day: .morgen).contains("vr"))
-        #expect(headerDateLabel(hours, day: .overmorgen).contains("za"))
-        #expect(headerDateLabel(hours, day: .week).contains(" - "))
-        #expect(headerDateLabel([], day: .vandaag) == "")
-        #expect(headerDateLabel([], day: .week) == "")
+    @Test func headerDatesForDaysAndWeek() {
+        #expect(headerDate(hours, day: .vandaag) == .single(IsoTime.date("2026-06-11T12:00")))
+        #expect(headerDate(hours, day: .morgen) == .single(IsoTime.date("2026-06-12T12:00")))
+        #expect(headerDate(hours, day: .overmorgen) == .single(IsoTime.date("2026-06-13T12:00")))
+        #expect(headerDate(hours, day: .week) == .range(
+            IsoTime.date("2026-06-11T12:00"),
+            IsoTime.date("2026-06-13T12:00")
+        ))
+        #expect(headerDate([], day: .vandaag) == .none)
+        #expect(headerDate([], day: .week) == .none)
     }
 }

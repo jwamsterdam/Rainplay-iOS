@@ -100,8 +100,8 @@ private func niceStartIndex(_ points: [ForecastPoint], now: Date) -> Int {
     let nowMs = now.timeIntervalSince1970 * 1000
     var last = -1
     for (i, point) in points.enumerated() {
-        let t = point.time
-        guard t.hasSuffix(":00") || t.hasSuffix(":30") else { continue }
+        let minute = Calendar.current.component(.minute, from: IsoTime.date(point.isoTime))
+        guard minute == 0 || minute == 30 else { continue }
         if IsoTime.ms(point.isoTime) > nowMs { break }
         last = i
     }
@@ -146,12 +146,27 @@ func averageTemperature(_ hours: [HourlyWeather]) -> Int? {
     return Int(average(hours.map(\.temperatureC)).rounded())
 }
 
-func headerDateLabel(_ hours: [HourlyWeather], day: DayOption) -> String {
-    if day == .week { return weekRangeLabel(hours) }
+// Canonieke kop-datum voor de gekozen dag: één datum, of een week-bereik. De
+// view formatteert dit via TimeFormatting (locale-aware) i.p.v. een vooraf
+// gerenderde string. `.none` = geen data.
+enum HeaderDate: Equatable {
+    case none
+    case single(Date)
+    case range(Date, Date)
+}
 
-    guard let targetDate = dateForDayOption(hours, day) else { return "" }
+func headerDate(_ hours: [HourlyWeather], day: DayOption) -> HeaderDate {
+    if day == .week {
+        guard let first = hours.first.map({ String($0.isoTime.prefix(10)) }),
+              let last = hours.last.map({ String($0.isoTime.prefix(10)) }) else {
+            return .none
+        }
+        return .range(IsoTime.date("\(first)T12:00"), IsoTime.date("\(last)T12:00"))
+    }
 
-    return formatDutchDate(targetDate)
+    guard let targetDate = dateForDayOption(hours, day) else { return .none }
+
+    return .single(IsoTime.date("\(targetDate)T12:00"))
 }
 
 func hoursForDay(_ hours: [HourlyWeather], _ day: DayOption) -> [HourlyWeather] {
@@ -189,43 +204,13 @@ private func dateForDayOption(_ hours: [HourlyWeather], _ day: DayOption) -> Str
     return String(format: "%04d-%02d-%02d", year, month, dayOfMonth)
 }
 
-private func weekRangeLabel(_ hours: [HourlyWeather]) -> String {
-    guard let firstDate = hours.first.map({ String($0.isoTime.prefix(10)) }),
-          let lastDate = hours.last.map({ String($0.isoTime.prefix(10)) }) else {
-        return ""
-    }
-
-    return "\(formatDutchDate(firstDate)) - \(formatDutchDate(lastDate))"
-}
-
-// "do 9 jul", zoals Intl.DateTimeFormat("nl-NL") in de PWA (punten gestript).
-private let dutchDateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.locale = Locale(identifier: "nl_NL")
-    formatter.dateFormat = "EEE d MMM"
-    return formatter
-}()
-
-private let dutchWeekdayFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.locale = Locale(identifier: "nl_NL")
-    formatter.dateFormat = "EEE"
-    return formatter
-}()
-
-private func formatDutchDate(_ dateString: String) -> String {
-    dutchDateFormatter
-        .string(from: IsoTime.date("\(dateString)T12:00"))
-        .replacingOccurrences(of: ".", with: "")
-}
-
 private func configuredDayHours(_ hours: [HourlyWeather]) -> [HourlyWeather] {
     let startHour = WeatherViewSettings.dayChartStartHour
     let endHour = WeatherViewSettings.dayChartEndHour
     let hourStep = WeatherViewSettings.dayChartHourStep
 
     return hours.filter { hour in
-        let numericHour = Int(hour.time.prefix(2)) ?? 0
+        let numericHour = Calendar.current.component(.hour, from: IsoTime.date(hour.isoTime))
         let inRange = endHour >= 24
             ? numericHour >= startHour && numericHour < 24
             : numericHour >= startHour && numericHour <= endHour
@@ -261,7 +246,9 @@ private func summarizeDay(_ date: String, _ dayHours: [HourlyWeather]) -> Hourly
 
     var summary = bestHour
     summary.isoTime = "\(date)T12:00"
-    summary.time = formatWeekday(date)
+    // Identiteits-`time` = de dagsleutel (uniek per dag, stabiele grafiek-as-
+    // categorie). De view formatteert de weekdag locale-aware uit isoTime.
+    summary.time = date
     summary.temperatureC = average(dayHours.map(\.temperatureC)).rounded()
     summary.score = Int(average(dayHours.map { Double($0.score) }).rounded())
     summary.precipitationMm = min(3, precipitationSum)
@@ -284,10 +271,4 @@ private func dominantKind(rainyHours: Int, sunnyHours: Int, partlyHours: Int) ->
 private func average(_ values: [Double]) -> Double {
     guard !values.isEmpty else { return 0 }
     return values.reduce(0, +) / Double(values.count)
-}
-
-private func formatWeekday(_ dateString: String) -> String {
-    dutchWeekdayFormatter
-        .string(from: IsoTime.date("\(dateString)T12:00"))
-        .replacingOccurrences(of: ".", with: "")
 }

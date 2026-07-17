@@ -60,6 +60,17 @@ final class AppModel {
         didSet { defaults.set(temperatureUnit.rawValue, forKey: Keys.temperatureUnit) }
     }
 
+    // Voorkeur voor de tijdnotatie (12/24-uurs); canonieke tijden blijven
+    // isoTime, dit werkt alleen op de presentatiegrens. Bewaard als rawValue.
+    var timeFormat: TimeFormat {
+        didSet { defaults.set(timeFormat.rawValue, forKey: Keys.timeFormat) }
+    }
+
+    // Voorkeur voor de datumnotatie; werkt alleen op de presentatiegrens.
+    var dateFormat: DateStyle {
+        didSet { defaults.set(dateFormat.rawValue, forKey: Keys.dateFormat) }
+    }
+
     // MARK: - Forecast-state
 
     private(set) var forecast: Forecast?
@@ -105,6 +116,8 @@ final class AppModel {
         static let showIcons = "rainplay.showIcons"
         static let twilightRadiation = "rainplay.twilightRadiation"
         static let temperatureUnit = "rainplay.temperatureUnit"
+        static let timeFormat = "rainplay.timeFormat"
+        static let dateFormat = "rainplay.dateFormat"
     }
 
     init(
@@ -131,6 +144,10 @@ final class AppModel {
             ?? defaultTwilightRadiationWm2
         temperatureUnit = (defaults.string(forKey: Keys.temperatureUnit)
             .flatMap(TemperatureUnit.init(rawValue:))) ?? .system
+        timeFormat = (defaults.string(forKey: Keys.timeFormat)
+            .flatMap(TimeFormat.init(rawValue:))) ?? .system
+        dateFormat = (defaults.string(forKey: Keys.dateFormat)
+            .flatMap(DateStyle.init(rawValue:))) ?? .system
 
         networkMonitor.onReconnect = { [weak self] in
             Task { await self?.loadForecastIfStale() }

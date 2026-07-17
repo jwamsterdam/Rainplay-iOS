@@ -2,21 +2,15 @@ import Foundation
 
 // Beste-buitenmoment-logica, 1:1 geport uit de PWA (src/lib/chart.ts).
 
+// Canonieke start/eind van het venster. `start` is altijd het begintijdstip;
+// `end` is nil voor week-samenvattingen (die hebben geen tijd binnen de dag).
+// Views formatteren deze via TimeFormatting; de logica leest nooit een
+// vooraf gerenderde tijdstring.
 struct OutdoorWindow: Equatable {
     var startIndex: Int
     var endIndex: Int
-    var startTime: String
-    var endTime: String
-}
-
-func bestStartTime(_ hours: [HourlyWeather]) -> String {
-    bestOutdoorWindow(hours)?.startTime ?? "--:--"
-}
-
-func bestWindowLabel(_ hours: [HourlyWeather]) -> String {
-    guard let bestWindow = bestOutdoorWindow(hours) else { return "--:--" }
-
-    return "\(bestWindow.startTime) - \(bestWindow.endTime)"
+    var start: Date
+    var end: Date?
 }
 
 // Nuance-regel onder het verdict: benoemt de beste dagperiode en waarschuwt voor
@@ -24,7 +18,7 @@ func bestWindowLabel(_ hours: [HourlyWeather]) -> String {
 func outdoorSummaryLabel(_ hours: [HourlyWeather], bestWindow: OutdoorWindow?) -> String {
     guard let bestWindow else { return "Geen duidelijk buitenmoment" }
 
-    let period = dayPeriodLabel(bestWindow.startTime)
+    let period = dayPeriodLabel(bestWindow.start)
     let rainBefore = hours.prefix(bestWindow.startIndex).contains(where: hasMeaningfulRain)
     let rainAfter = hours.dropFirst(bestWindow.endIndex + 1).contains(where: hasMeaningfulRain)
 
@@ -124,21 +118,21 @@ private func windowFromIndexes(_ hours: [HourlyWeather], _ startIndex: Int, _ en
     OutdoorWindow(
         startIndex: startIndex,
         endIndex: endIndex,
-        startTime: hours[startIndex].time,
-        endTime: endTimeForWindow(hours, endIndex)
+        start: IsoTime.date(hours[startIndex].isoTime),
+        end: endDateForWindow(hours, endIndex)
     )
 }
 
-private func endTimeForWindow(_ hours: [HourlyWeather], _ endIndex: Int) -> String {
-    if endIndex + 1 < hours.count { return hours[endIndex + 1].time }
+// Canonieke eindtijd van het venster als Date. Bij week-samenvattingen (dag-
+// sleutels zonder tijd binnen de dag) is er geen intra-day eindtijd → nil.
+private func endDateForWindow(_ hours: [HourlyWeather], _ endIndex: Int) -> Date? {
+    if endIndex + 1 < hours.count { return IsoTime.date(hours[endIndex + 1].isoTime) }
 
-    // Week-weergave: dagnamen zonder ":" blijven zoals ze zijn.
-    if !hours[endIndex].time.contains(":") { return hours[endIndex].time }
+    // Week-weergave: de identiteits-`time` is een dagsleutel zonder ":".
+    if !hours[endIndex].time.contains(":") { return nil }
 
     let stepMs = inferStepMs(hours.map { IsoTime.ms($0.isoTime) })
-    let endDate = IsoTime.date(hours[endIndex].isoTime).addingTimeInterval(stepMs / 1000)
-    let components = Calendar.current.dateComponents([.hour, .minute], from: endDate)
-    return String(format: "%02d:%02d", components.hour ?? 0, components.minute ?? 0)
+    return IsoTime.date(hours[endIndex].isoTime).addingTimeInterval(stepMs / 1000)
 }
 
 private func hourOfDayFor(_ hour: HourlyWeather) -> Int {
@@ -163,10 +157,8 @@ private func hasMeaningfulRain(_ hour: HourlyWeather) -> Bool {
     hour.kind == .rain || hour.precipitationMm >= 0.2
 }
 
-private func dayPeriodLabel(_ time: String) -> String {
-    // Week-dagnamen ("ma") parsen niet als getal; net als NaN in de PWA vallen
-    // die dan door naar "avond".
-    let hour = Int(time.prefix(2)) ?? 24
+private func dayPeriodLabel(_ start: Date) -> String {
+    let hour = Calendar.current.component(.hour, from: start)
     if hour < 12 { return "ochtend" }
     if hour < 18 { return "middag" }
     return "avond"

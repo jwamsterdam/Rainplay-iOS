@@ -6,8 +6,12 @@ import Foundation
 // adviesteksten, en draait bestOutdoorWindow niet 3× per render.
 struct DecisionSummary: Equatable {
     var temperature: Int?
-    var dateLabel: String
-    var bestStartTime: String
+    // Canonieke kop-datum en beste-start; de view formatteert deze via
+    // TimeFormatting op basis van de gekozen tijd/datum-notatie. `bestStart` is
+    // nil wanneer er geen duidelijk buitenmoment is (view toont dan geen
+    // "Buiten vanaf …").
+    var headerDate: HeaderDate
+    var bestStart: Date?
     var summaryLabel: String
 }
 
@@ -32,8 +36,8 @@ func decisionSummary(
 
     return DecisionSummary(
         temperature: temperature,
-        dateLabel: headerDateLabel(forecast?.hourly ?? [], day: day),
-        bestStartTime: window?.startTime ?? "--:--",
+        headerDate: headerDate(forecast?.hourly ?? [], day: day),
+        bestStart: window?.start,
         summaryLabel: outdoorSummaryLabel(hours, bestWindow: window)
     )
 }

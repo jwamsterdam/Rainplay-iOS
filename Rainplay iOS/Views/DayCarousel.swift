@@ -56,6 +56,7 @@ struct DayCarousel: View {
                 showIcons: model.showIcons,
                 twilightRadiation: model.twilightRadiation,
                 temperatureUnit: model.temperatureUnit,
+                timeFormat: model.timeFormat,
                 geometry: geometry(for: day),
                 now: model.currentDate,
                 isToday: day == .vandaag,

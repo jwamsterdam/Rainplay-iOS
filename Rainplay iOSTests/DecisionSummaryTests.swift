@@ -17,9 +17,9 @@ struct DecisionSummaryTests {
     @Test func emptyForecastGivesNilTemperatureAndFallbacks() {
         let summary = decisionSummary(forecast: nil, day: .vandaag, horizon: .heleDag, now: Date())
         #expect(summary.temperature == nil)
-        #expect(summary.bestStartTime == "--:--")
+        #expect(summary.bestStart == nil)
         #expect(summary.summaryLabel == "Geen duidelijk buitenmoment")
-        #expect(summary.dateLabel == "")
+        #expect(summary.headerDate == .none)
     }
 
     @Test func vandaagUsesCurrentTemperatureAndDerivesWindow() {
@@ -33,8 +33,9 @@ struct DecisionSummaryTests {
 
         let summary = decisionSummary(forecast: forecast, day: .vandaag, horizon: .heleDag, now: Date())
         #expect(summary.temperature == 21)                       // live temp, niet het gemiddelde
-        #expect(summary.dateLabel.contains("do"))                // donderdag 11 juni
-        #expect(summary.bestStartTime != "--:--")                // er is een venster
+        // Kop-datum is de canonieke dag (11 juni), de view formatteert die.
+        #expect(summary.headerDate == .single(IsoTime.date("2026-06-11T12:00")))
+        #expect(summary.bestStart != nil)                        // er is een venster
         #expect(summary.summaryLabel.contains("beste"))          // vriendelijke nuance-regel
     }
 }

@@ -21,6 +21,8 @@ struct SettingsSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     temperatureSection
+                    timeSection
+                    dateSection
                     layersSection
                     twilightSection
                     Text("Tik op het kleurvlak om de kleur te kiezen. Sleep de schuifregelaar voor de intensiteit.")
@@ -78,6 +80,48 @@ struct SettingsSheet: View {
         case .system: return "Systeem"
         case .celsius: return "°C"
         case .fahrenheit: return "°F"
+        }
+    }
+
+    // Tijdnotatie: "Systeem" volgt de 12/24-uurs-instelling van het apparaat;
+    // 12u/24u forceren de keuze. Canonieke tijden blijven isoTime (TimeFormatting).
+    private var timeSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Tijdnotatie").font(.system(size: 15, weight: .semibold))
+            SegmentedControl(
+                options: TimeFormat.allCases,
+                selection: $model.timeFormat,
+                label: timeFormatLabel
+            )
+        }
+    }
+
+    private func timeFormatLabel(_ format: TimeFormat) -> String {
+        switch format {
+        case .system: return "Systeem"
+        case .twelveHour: return "12u"
+        case .twentyFourHour: return "24u"
+        }
+    }
+
+    // Datumnotatie: "Systeem" volgt de locale-volgorde met weekdag; de andere
+    // kiezen tussen wel/geen weekdag (voorbeeld erbij zodat het meteen duidelijk is).
+    private var dateSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Datumnotatie").font(.system(size: 15, weight: .semibold))
+            SegmentedControl(
+                options: DateStyle.allCases,
+                selection: $model.dateFormat,
+                label: dateStyleLabel
+            )
+        }
+    }
+
+    private func dateStyleLabel(_ style: DateStyle) -> String {
+        switch style {
+        case .system: return "Systeem"
+        case .dayMonth: return "1 jul"
+        case .weekdayDayMonth: return "za 1 jul"
         }
     }
 

@@ -17,6 +17,7 @@ struct DayChart: View {
     let showIcons: Bool
     let twilightRadiation: Double
     var temperatureUnit: TemperatureUnit = .system
+    var timeFormat: TimeFormat = .system
     // Gedeeld over alle 4 de dag-panelen (zelfde temp-as), zodat ze vergelijkbaar
     // zijn bij het swipen. Bevat ook maxMM voor de regen-as.
     let geometry: ChartGeometry
@@ -25,6 +26,23 @@ struct DayChart: View {
     var currentTemperatureC: Int?
 
     private var rainMax: Double { geometry.rainMax }
+
+    // De grafiek-as gebruikt `hour.time` als categorie-identiteit (uniek per
+    // punt), maar toont een geformatteerde tijd/weekdag. Deze map koppelt de
+    // identiteit aan de weergavestring, op basis van de gekozen tijdnotatie.
+    private var tickLabels: [String: String] {
+        Dictionary(hours.map { ($0.time, tickLabel(for: $0)) }, uniquingKeysWith: { first, _ in first })
+    }
+
+    // Uur-punten ("HH:mm") → tijd in de gekozen notatie; week-punten (dagsleutel
+    // zonder ":") → locale-aware weekdag-afkorting.
+    private func tickLabel(for hour: HourlyWeather) -> String {
+        if hour.time.contains(":") {
+            return timeString(isoTime: hour.isoTime, format: timeFormat)
+        }
+        return weekdayLabel(date: IsoTime.date(hour.isoTime))
+    }
+
     private let plotHeight: CGFloat = 232
     private let topRowsHeight: CGFloat = 64   // ruimte boven de plot voor score + iconen
 
@@ -52,7 +70,7 @@ struct DayChart: View {
         }
         .chartOverlay { proxy in
             plotRect(proxy) { rect in
-                ChartScoreIconRows(hours: hours, showIcons: showIcons, proxy: proxy, rect: rect, topRowsHeight: topRowsHeight)
+                ChartScoreIconRows(hours: hours, showIcons: showIcons, proxy: proxy, rect: rect, topRowsHeight: topRowsHeight, timeFormat: timeFormat)
                 if isToday, let fraction = nowFraction(isoTimes: hours.map(\.isoTime), now: now) {
                     ChartNowLine(
                         x: rect.minX + fraction * rect.width,
@@ -133,12 +151,13 @@ struct DayChart: View {
 
     @AxisContentBuilder
     private var xAxis: some AxisContent {
-        AxisMarks(values: hours.map(\.time)) { value in
+        let labels = tickLabels
+        return AxisMarks(values: hours.map(\.time)) { value in
             AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 5]))
                 .foregroundStyle(Tokens.grid)
             AxisValueLabel {
-                if let label = value.as(String.self) {
-                    Text(formatTick(label))
+                if let key = value.as(String.self) {
+                    Text(labels[key] ?? key)
                         .font(.system(size: 11))
                         .foregroundStyle(Tokens.axisLabel)
                         .fixedSize()
@@ -187,6 +206,7 @@ private struct ChartScoreIconRows: View {
     let proxy: ChartProxy
     let rect: CGRect
     let topRowsHeight: CGFloat
+    var timeFormat: TimeFormat = .system
 
     var body: some View {
         ForEach(Array(hours.enumerated()), id: \.offset) { _, hour in
@@ -199,10 +219,19 @@ private struct ChartScoreIconRows: View {
                 if showIcons {
                     WeatherIcon(kind: hour.kind, size: 20)
                         .position(x: x, y: rect.minY - topRowsHeight + 40)
-                        .accessibilityLabel("\(hour.time): \(hour.kind.displayName)")
+                        .accessibilityLabel("\(spokenTime(hour)): \(hour.kind.displayName)")
                 }
             }
         }
+    }
+
+    // Leesbaar tijdstip voor VoiceOver: uur-punten in de gekozen notatie,
+    // week-punten als weekdag.
+    private func spokenTime(_ hour: HourlyWeather) -> String {
+        if hour.time.contains(":") {
+            return timeString(isoTime: hour.isoTime, format: timeFormat)
+        }
+        return weekdayLabel(date: IsoTime.date(hour.isoTime))
     }
 
     // Eén VoiceOver-element met leesbaar label ("Score 8 om 14:00").
@@ -214,7 +243,7 @@ private struct ChartScoreIconRows: View {
                 .foregroundStyle(.white)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Score \(hour.score) om \(hour.time)")
+        .accessibilityLabel("Score \(hour.score) om \(spokenTime(hour))")
     }
 }
 
