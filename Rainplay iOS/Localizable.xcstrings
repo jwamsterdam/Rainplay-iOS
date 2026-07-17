@@ -1,0 +1,1111 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "a11y.scoreAtTime %lld %@" : {
+      "comment" : "VoiceOver label for a chart score badge. %lld is the 0-10 score, %@ is the time or weekday.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score %1$lld at %2$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score %1$lld om %2$@"
+          }
+        }
+      }
+    },
+    "a11y.temperatureDegrees %lld" : {
+      "comment" : "VoiceOver label for the hero temperature. %lld is the temperature value in the chosen unit.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld degrees"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld graden"
+          }
+        }
+      }
+    },
+    "a11y.temperatureUnknown" : {
+      "comment" : "VoiceOver label when no temperature is available yet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature unknown"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatuur onbekend"
+          }
+        }
+      }
+    },
+    "a11y.timeWeather %@ %@" : {
+      "comment" : "VoiceOver label for a chart weather icon. First %@ is the time or weekday, second %@ is the weather description.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
+    "carousel.loading" : {
+      "comment" : "Shown while the forecast is loading.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading weather"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weer laden"
+          }
+        }
+      }
+    },
+    "carousel.retry" : {
+      "comment" : "Button to retry loading the forecast.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opnieuw proberen"
+          }
+        }
+      }
+    },
+    "carousel.unavailable" : {
+      "comment" : "Shown when the forecast failed to load.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather data unavailable"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weerdata niet beschikbaar"
+          }
+        }
+      }
+    },
+    "chart.now" : {
+      "comment" : "Chart now-line label when the current temperature is unavailable.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "now"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nu"
+          }
+        }
+      }
+    },
+    "color.night" : {
+      "comment" : "Settings color row label for the night color.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Night"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nacht"
+          }
+        }
+      }
+    },
+    "common.done" : {
+      "comment" : "Generic Done button.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klaar"
+          }
+        }
+      }
+    },
+    "common.system" : {
+      "comment" : "Segmented option meaning follow the device/system setting.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systeem"
+          }
+        }
+      }
+    },
+    "date.example.dayMonth" : {
+      "comment" : "Example of the day-month date style, shown as the option label.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jul 1"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 jul"
+          }
+        }
+      }
+    },
+    "date.example.weekdayDayMonth" : {
+      "comment" : "Example of the weekday-day-month date style, shown as the option label.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sat Jul 1"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "za 1 jul"
+          }
+        }
+      }
+    },
+    "day.dayAfterTomorrow" : {
+      "comment" : "Full name for the day after tomorrow (hero header).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day after tomorrow"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overmorgen"
+          }
+        }
+      }
+    },
+    "day.dayAfterTomorrow.short" : {
+      "comment" : "Abbreviated day-after-tomorrow label for the day selector.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In 2d"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overm."
+          }
+        }
+      }
+    },
+    "day.today" : {
+      "comment" : "Day selector: today.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vandaag"
+          }
+        }
+      }
+    },
+    "day.tomorrow" : {
+      "comment" : "Day selector: tomorrow.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomorrow"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgen"
+          }
+        }
+      }
+    },
+    "day.week" : {
+      "comment" : "Day selector: week overview.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week"
+          }
+        }
+      }
+    },
+    "hero.outsideFrom %@" : {
+      "comment" : "Hero headline: the best time to head outside. %@ is a formatted time.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outside from %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buiten vanaf %@"
+          }
+        }
+      }
+    },
+    "horizon.allDay" : {
+      "comment" : "Horizon selector: the whole day.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All day"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hele dag"
+          }
+        }
+      }
+    },
+    "horizon.plus2" : {
+      "comment" : "Horizon selector: next 2 hours.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+2 hr"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+2 uur"
+          }
+        }
+      }
+    },
+    "horizon.plus6" : {
+      "comment" : "Horizon selector: next 6 hours.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+6 hr"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+6 uur"
+          }
+        }
+      }
+    },
+    "layer.icons" : {
+      "comment" : "Chart layer toggle: weather icons.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icons"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iconen"
+          }
+        }
+      }
+    },
+    "layer.precipitation" : {
+      "comment" : "Chart layer toggle: precipitation.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precipitation"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neerslag"
+          }
+        }
+      }
+    },
+    "layer.temperature" : {
+      "comment" : "Chart layer toggle: temperature.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatuur"
+          }
+        }
+      }
+    },
+    "location.current" : {
+      "comment" : "Title of the current-location row before a GPS name is known.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Huidige locatie"
+          }
+        }
+      }
+    },
+    "location.deniedMessage" : {
+      "comment" : "Explanation shown when location access was denied.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No access to your location. Turn on location access in Settings to use your current spot."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen toegang tot je locatie. Zet locatietoegang aan in Instellingen om je huidige plek te gebruiken."
+          }
+        }
+      }
+    },
+    "location.gps" : {
+      "comment" : "Subtitle of the current-location row.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS locatie"
+          }
+        }
+      }
+    },
+    "location.locating" : {
+      "comment" : "Subtitle of the current-location row while locating.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Getting location…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locatie ophalen..."
+          }
+        }
+      }
+    },
+    "location.noResults" : {
+      "comment" : "Search error when no places matched.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No places found."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen plaatsen gevonden."
+          }
+        }
+      }
+    },
+    "location.openSettings" : {
+      "comment" : "Button that opens iOS Settings to grant location access.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Instellingen"
+          }
+        }
+      }
+    },
+    "location.saved" : {
+      "comment" : "Section header for saved locations.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opgeslagen"
+          }
+        }
+      }
+    },
+    "location.search" : {
+      "comment" : "Section header and text field placeholder for searching a place.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search place"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plaats zoeken"
+          }
+        }
+      }
+    },
+    "location.searchFailed" : {
+      "comment" : "Search error when the request failed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search failed."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoeken lukte niet."
+          }
+        }
+      }
+    },
+    "location.searching" : {
+      "comment" : "Shown while a place search is running.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searching…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoeken..."
+          }
+        }
+      }
+    },
+    "location.title" : {
+      "comment" : "Navigation title of the location selector.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locatie"
+          }
+        }
+      }
+    },
+    "offline.banner" : {
+      "comment" : "Banner shown when the device is offline.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No internet connection"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen internetverbinding"
+          }
+        }
+      }
+    },
+    "period.afternoon" : {
+      "comment" : "Day period word used inside summary sentences.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "afternoon"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "middag"
+          }
+        }
+      }
+    },
+    "period.evening" : {
+      "comment" : "Day period word used inside summary sentences.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "evening"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "avond"
+          }
+        }
+      }
+    },
+    "period.morning" : {
+      "comment" : "Day period word used inside summary sentences.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "morning"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ochtend"
+          }
+        }
+      }
+    },
+    "settings.chartColors" : {
+      "comment" : "Settings navigation title.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chart colors"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grafiekkleuren"
+          }
+        }
+      }
+    },
+    "settings.chartLayers" : {
+      "comment" : "Settings section title for chart layers.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chart layers"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grafiek lagen"
+          }
+        }
+      }
+    },
+    "settings.colorHelp" : {
+      "comment" : "Help text above the color rows.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the color swatch to pick a color. Drag the slider for intensity."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tik op het kleurvlak om de kleur te kiezen. Sleep de schuifregelaar voor de intensiteit."
+          }
+        }
+      }
+    },
+    "settings.dateFormat" : {
+      "comment" : "Settings section title for the date format.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date format"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datumnotatie"
+          }
+        }
+      }
+    },
+    "settings.language" : {
+      "comment" : "Settings section title for the app language.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taal"
+          }
+        }
+      }
+    },
+    "settings.language.help" : {
+      "comment" : "Help text under the language row.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the app language in iOS settings."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies de taal van de app in de iOS-instellingen."
+          }
+        }
+      }
+    },
+    "settings.language.open" : {
+      "comment" : "Button that opens the per-app language screen in iOS Settings.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open language settings"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open taalinstellingen"
+          }
+        }
+      }
+    },
+    "settings.temperature" : {
+      "comment" : "Settings section title for the temperature unit.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatuur"
+          }
+        }
+      }
+    },
+    "settings.timeFormat" : {
+      "comment" : "Settings section title for the time format.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time format"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tijdnotatie"
+          }
+        }
+      }
+    },
+    "settings.title" : {
+      "comment" : "Accessibility label for the settings button.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instellingen"
+          }
+        }
+      }
+    },
+    "settings.twilightHelp" : {
+      "comment" : "Help text for the twilight threshold slider.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lower = sharper transition · default 20"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lager = scherpere overgang · standaard 20"
+          }
+        }
+      }
+    },
+    "settings.twilightThreshold" : {
+      "comment" : "Settings section title for the twilight radiation threshold.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Twilight threshold"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schemering drempel"
+          }
+        }
+      }
+    },
+    "summary.afterRain %@" : {
+      "comment" : "Hero summary: rain earlier, then a good window. %@ is the localized day period.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After rain - %@ is best"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na regen - %@ beste"
+          }
+        }
+      }
+    },
+    "summary.betweenShowers %@" : {
+      "comment" : "Hero summary: a dry window between showers. %@ is the localized day period.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Between showers - %@ is best"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tussen buien door - %@ beste"
+          }
+        }
+      }
+    },
+    "summary.clear %@" : {
+      "comment" : "Hero summary: a clear window with no nearby rain. %@ is the localized day period.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Best outside in the %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ beste buitenmoment"
+          }
+        }
+      }
+    },
+    "summary.clearThenRain %@" : {
+      "comment" : "Hero summary: a good window now, rain later. %@ is the localized day period.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain later - %@ is best"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later regen - %@ beste"
+          }
+        }
+      }
+    },
+    "summary.none" : {
+      "comment" : "Hero summary when there is no clear time to go outside.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No clear time to go outside"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen duidelijk buitenmoment"
+          }
+        }
+      }
+    },
+    "time.12h" : {
+      "comment" : "Time format option: 12-hour.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12h"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12u"
+          }
+        }
+      }
+    },
+    "time.24h" : {
+      "comment" : "Time format option: 24-hour.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24h"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24u"
+          }
+        }
+      }
+    },
+    "unit.celsius" : {
+      "comment" : "Temperature unit option: Celsius.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°C"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°C"
+          }
+        }
+      }
+    },
+    "unit.fahrenheit" : {
+      "comment" : "Temperature unit option: Fahrenheit.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°F"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°F"
+          }
+        }
+      }
+    },
+    "weather.cloud" : {
+      "comment" : "Weather description: cloudy.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudy"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewolkt"
+          }
+        }
+      }
+    },
+    "weather.partly" : {
+      "comment" : "Weather description: partly cloudy.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partly cloudy"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zon met bewolking"
+          }
+        }
+      }
+    },
+    "weather.rain" : {
+      "comment" : "Weather description: rain.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen"
+          }
+        }
+      }
+    },
+    "weather.sun" : {
+      "comment" : "Weather description: sunny.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunny"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zon"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
