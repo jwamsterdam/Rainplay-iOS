@@ -107,10 +107,12 @@ struct WeatherScreen: View {
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(Tokens.heroDateLabel)
                 }
-                Text(summary.temperature.map { "\($0)°" } ?? "--°")
+                Text(summary.temperature.map { temperatureString(celsius: $0, unit: model.temperatureUnit) } ?? "--°")
                     .font(.system(size: 96, weight: .semibold))
                     .foregroundStyle(Tokens.inkStrong)
-                    .accessibilityLabel(summary.temperature.map { "\($0) graden" } ?? "Temperatuur onbekend")
+                    .accessibilityLabel(summary.temperature
+                        .map { "\(temperatureValue(celsius: $0, unit: model.temperatureUnit)) graden" }
+                        ?? "Temperatuur onbekend")
                 // Alleen tonen wanneer er een echt venster is; bij lege/mislukte
                 // data draagt summaryLabel de boodschap i.p.v. "Buiten vanaf --:--".
                 if summary.bestStartTime != "--:--" {

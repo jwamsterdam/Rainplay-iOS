@@ -16,6 +16,7 @@ struct DayChart: View {
     let showRain: Bool
     let showIcons: Bool
     let twilightRadiation: Double
+    var temperatureUnit: TemperatureUnit = .system
     // Gedeeld over alle 4 de dag-panelen (zelfde temp-as), zodat ze vergelijkbaar
     // zijn bij het swipen. Bevat ook maxMM voor de regen-as.
     let geometry: ChartGeometry
@@ -53,8 +54,13 @@ struct DayChart: View {
             plotRect(proxy) { rect in
                 ChartScoreIconRows(hours: hours, showIcons: showIcons, proxy: proxy, rect: rect, topRowsHeight: topRowsHeight)
                 if isToday, let fraction = nowFraction(isoTimes: hours.map(\.isoTime), now: now) {
-                    ChartNowLine(x: rect.minX + fraction * rect.width, rect: rect, currentTemperatureC: currentTemperatureC)
-                        .accessibilityHidden(true)
+                    ChartNowLine(
+                        x: rect.minX + fraction * rect.width,
+                        rect: rect,
+                        currentTemperatureC: currentTemperatureC,
+                        temperatureUnit: temperatureUnit
+                    )
+                    .accessibilityHidden(true)
                 }
             }
         }
@@ -118,7 +124,8 @@ struct DayChart: View {
         AxisMarks(position: .trailing, values: geo.tempTicks.map(geo.normalizedTemp)) { value in
             if showTemp, let pos = value.as(Double.self) {
                 AxisValueLabel {
-                    Text("\(geo.temperature(atNormalized: pos))°").foregroundStyle(Tokens.tempAxisLabel)
+                    Text(temperatureString(celsius: geo.temperature(atNormalized: pos), unit: temperatureUnit))
+                        .foregroundStyle(Tokens.tempAxisLabel)
                 }
             }
         }
@@ -216,6 +223,7 @@ private struct ChartNowLine: View {
     let x: CGFloat
     let rect: CGRect
     let currentTemperatureC: Int?
+    var temperatureUnit: TemperatureUnit = .system
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -225,7 +233,7 @@ private struct ChartNowLine: View {
             }
             .stroke(Tokens.nowMarker, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
 
-            Text(currentTemperatureC.map { "\($0)°" } ?? "nu")
+            Text(currentTemperatureC.map { temperatureString(celsius: $0, unit: temperatureUnit) } ?? "nu")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Tokens.nowMarker)
                 .padding(.horizontal, 2)

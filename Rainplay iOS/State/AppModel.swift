@@ -54,6 +54,12 @@ final class AppModel {
         didSet { defaults.set(twilightRadiation, forKey: Keys.twilightRadiation) }
     }
 
+    // Voorkeur voor de temperatuureenheid; canonieke data blijft Celsius, dit
+    // werkt alleen op de presentatiegrens. Bewaard als rawValue-string.
+    var temperatureUnit: TemperatureUnit {
+        didSet { defaults.set(temperatureUnit.rawValue, forKey: Keys.temperatureUnit) }
+    }
+
     // MARK: - Forecast-state
 
     private(set) var forecast: Forecast?
@@ -98,6 +104,7 @@ final class AppModel {
         static let showRain = "rainplay.showRain"
         static let showIcons = "rainplay.showIcons"
         static let twilightRadiation = "rainplay.twilightRadiation"
+        static let temperatureUnit = "rainplay.temperatureUnit"
     }
 
     init(
@@ -122,6 +129,8 @@ final class AppModel {
         showIcons = defaults.object(forKey: Keys.showIcons) as? Bool ?? true
         twilightRadiation = defaults.object(forKey: Keys.twilightRadiation) as? Double
             ?? defaultTwilightRadiationWm2
+        temperatureUnit = (defaults.string(forKey: Keys.temperatureUnit)
+            .flatMap(TemperatureUnit.init(rawValue:))) ?? .system
 
         networkMonitor.onReconnect = { [weak self] in
             Task { await self?.loadForecastIfStale() }

@@ -40,6 +40,17 @@ enum HorizonOption: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+// Voorkeur voor de temperatuureenheid in de UI. Canonieke data blijft altijd
+// Celsius; deze keuze werkt alleen op de presentatiegrens (zie
+// MeasurementFormatting). `.system` leidt de eenheid af uit de locale.
+enum TemperatureUnit: String, Codable, CaseIterable, Identifiable {
+    case system
+    case celsius
+    case fahrenheit
+
+    var id: String { rawValue }
+}
+
 struct HourlyWeather: Equatable {
     // Lokale tijd van de locatie zoals Open-Meteo die levert ("2026-07-09T14:00").
     // Bewust een string (net als de PWA) zodat datumfilters op stringprefix werken.
