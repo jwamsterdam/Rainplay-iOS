@@ -21,4 +21,16 @@ struct LocalizedLabelsTests {
             #expect(!text.contains("period."))
         }
     }
+
+    @Test func weekSummaryKeysResolveToRealText() {
+        let keys: [String.LocalizationValue] = [
+            "summary.week.clear", "summary.week.afterRain", "summary.week.clearThenRain",
+            "summary.week.betweenShowers", "summary.week.none",
+        ]
+        for key in keys {
+            let text = String(localized: key)
+            #expect(!text.isEmpty)
+            #expect(!text.contains("summary.week."))
+        }
+    }
 }

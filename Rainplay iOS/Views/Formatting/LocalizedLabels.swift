@@ -43,6 +43,18 @@ extension OutdoorSummary {
         }
     }
 
+    // Week-weergave: dag-georiënteerde samenvatting zónder dagperiode-woord (de
+    // kop toont al de dag). Zelfde regen-nuance-cases, andere copy.
+    var weekTitleKey: LocalizedStringKey {
+        switch self {
+        case .none: return "summary.week.none"
+        case .clear: return "summary.week.clear"
+        case .afterRain: return "summary.week.afterRain"
+        case .clearThenRain: return "summary.week.clearThenRain"
+        case .betweenShowers: return "summary.week.betweenShowers"
+        }
+    }
+
     // De dagperiode van dit token (nil voor .none).
     var period: DayPeriod? {
         switch self {

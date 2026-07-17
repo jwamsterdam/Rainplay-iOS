@@ -140,7 +140,7 @@ struct WeatherScreen: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                 }
-                Text(summary.summary.titleKey)
+                Text(model.selectedDay == .week ? summary.summary.weekTitleKey : summary.summary.titleKey)
                     .font(.system(size: 18, weight: .regular))
                     .foregroundStyle(Tokens.heroSubtitle)
             }
