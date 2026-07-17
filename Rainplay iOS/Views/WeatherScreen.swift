@@ -95,6 +95,10 @@ struct WeatherScreen: View {
                 .buttonStyle(.plain)
                 .frame(maxWidth: .infinity)
 
+                // De settings zijn alleen aanwezig in dev builds (Debug-configuratie);
+                // in een prod/Release-build (o.a. App Store-archive) is DEBUG niet
+                // gedefinieerd en verdwijnt de knop volledig uit de UI.
+                #if DEBUG
                 Button {
                     settingsOpen = true
                 } label: {
@@ -108,6 +112,7 @@ struct WeatherScreen: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(Text("settings.title"))
+                #endif
             }
             .padding(.horizontal, 4)
 

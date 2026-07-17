@@ -39,6 +39,13 @@ final class AppModel {
         didSet { persist(savedLocations, key: Keys.savedLocations) }
     }
 
+    // Maximaal aantal handmatig opgeslagen locaties; daarboven moet de gebruiker
+    // er eerst één verwijderen voordat een nieuwe kan worden toegevoegd.
+    let maxSavedLocations = 5
+
+    // Is er nog ruimte om een nieuwe locatie op te slaan?
+    var canAddLocation: Bool { savedLocations.count < maxSavedLocations }
+
     // MARK: - Instellingen (persistent)
 
     var cellColors: CellColors {
@@ -199,11 +206,19 @@ final class AppModel {
         return location
     }
 
-    func chooseLocation(_ location: ForecastLocation) {
-        if !savedLocations.contains(where: { ForecastLocation.isSame($0, location) }) {
-            savedLocations.append(location)
+    // Selecteert een locatie en bewaart hem indien nog niet opgeslagen. Geeft
+    // false terug wanneer het opslaan-maximum bereikt is en het om een nieuwe
+    // locatie gaat; de selectie verandert dan niet zodat de UI feedback kan tonen.
+    @discardableResult
+    func chooseLocation(_ location: ForecastLocation) -> Bool {
+        if savedLocations.contains(where: { ForecastLocation.isSame($0, location) }) {
+            selectedLocation = location
+            return true
         }
+        guard canAddLocation else { return false }
+        savedLocations.append(location)
         selectedLocation = location
+        return true
     }
 
     func deleteLocation(_ location: ForecastLocation) {

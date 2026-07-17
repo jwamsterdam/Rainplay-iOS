@@ -480,6 +480,23 @@
         }
       }
     },
+    "location.limitReached %lld" : {
+      "comment" : "Shown when the user tries to save more than the maximum number of locations. %lld is that maximum.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can save up to %lld locations. Remove one to add another."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je kunt maximaal %lld locaties bewaren. Verwijder er eerst één om een nieuwe toe te voegen."
+          }
+        }
+      }
+    },
     "location.locating" : {
       "comment" : "Subtitle of the current-location row while locating.",
       "localizations" : {
@@ -847,6 +864,7 @@
     },
     "settings.title" : {
       "comment" : "Accessibility label for the settings button.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -985,10 +1003,16 @@
       "comment" : "Week overview subtitle: this day is best, rain earlier in the week.",
       "localizations" : {
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Best after the rain" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Best after the rain"
+          }
         },
         "nl" : {
-          "stringUnit" : { "state" : "translated", "value" : "Beste na de regen" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beste na de regen"
+          }
         }
       }
     },
@@ -996,10 +1020,16 @@
       "comment" : "Week overview subtitle: a dry day between rainy days.",
       "localizations" : {
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Dry between showers" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dry between showers"
+          }
         },
         "nl" : {
-          "stringUnit" : { "state" : "translated", "value" : "Droog tussen buien" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Droog tussen buien"
+          }
         }
       }
     },
@@ -1007,10 +1037,16 @@
       "comment" : "Week overview subtitle: a fine day with no nearby rainy days.",
       "localizations" : {
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "The best day this week" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The best day this week"
+          }
         },
         "nl" : {
-          "stringUnit" : { "state" : "translated", "value" : "De beste dag deze week" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De beste dag deze week"
+          }
         }
       }
     },
@@ -1018,10 +1054,16 @@
       "comment" : "Week overview subtitle: this day is good, rain later in the week.",
       "localizations" : {
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "More rain afterwards" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More rain afterwards"
+          }
         },
         "nl" : {
-          "stringUnit" : { "state" : "translated", "value" : "Daarna meer regen" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daarna meer regen"
+          }
         }
       }
     },
@@ -1029,10 +1071,16 @@
       "comment" : "Week overview subtitle when no day is clearly dry.",
       "localizations" : {
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "No dry day this week" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No dry day this week"
+          }
         },
         "nl" : {
-          "stringUnit" : { "state" : "translated", "value" : "Geen droge dag deze week" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen droge dag deze week"
+          }
         }
       }
     },

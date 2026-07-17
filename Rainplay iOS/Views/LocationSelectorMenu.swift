@@ -30,17 +30,28 @@ struct LocationSelectorMenu: View {
                 }
 
                 if !model.savedLocations.isEmpty {
-                    Section("location.saved") {
+                    Section {
                         ForEach(model.savedLocations, id: \.key) { location in
                             savedRow(location)
                         }
                         .onDelete(perform: deleteManual)
+                    } header: {
+                        HStack {
+                            Text("location.saved")
+                            Spacer()
+                            Text(verbatim: "\(model.savedLocations.count)/\(model.maxSavedLocations)")
+                        }
                     }
                 }
 
                 Section("location.search") {
                     TextField("location.search", text: $query)
                         .autocorrectionDisabled()
+                    if !model.canAddLocation {
+                        Text("location.limitReached \(model.maxSavedLocations)")
+                            .font(.footnote)
+                            .foregroundStyle(Tokens.inkSoft)
+                    }
                     if isSearching {
                         Text("location.searching").font(.footnote).foregroundStyle(Tokens.inkSoft)
                     }
@@ -65,6 +76,11 @@ struct LocationSelectorMenu: View {
             .navigationTitle("location.title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                if !model.savedLocations.isEmpty {
+                    ToolbarItem(placement: .topBarLeading) {
+                        EditButton()
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("common.done") { isPresented = false }
                 }
@@ -145,7 +161,9 @@ struct LocationSelectorMenu: View {
     }
 
     private func choose(_ location: ForecastLocation) {
-        model.chooseLocation(location)
+        // Bij een bereikt maximum weigert het model een nieuwe locatie; de
+        // blijvende hint in de zoeksectie legt al uit dat er eerst één weg moet.
+        guard model.chooseLocation(location) else { return }
         query = ""
         suggestions = []
         searchError = nil
