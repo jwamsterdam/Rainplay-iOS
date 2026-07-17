@@ -69,7 +69,7 @@ struct DayChart: View {
                     .frame(width: rect.width, height: rect.height)
                     .position(x: rect.midX, y: rect.midY)
                 Rectangle()
-                    .stroke(Tokens.grid, lineWidth: 1)
+                    .stroke(Tokens.chartBorder, lineWidth: 1)
                     .frame(width: rect.width, height: rect.height)
                     .position(x: rect.midX, y: rect.midY)
             }

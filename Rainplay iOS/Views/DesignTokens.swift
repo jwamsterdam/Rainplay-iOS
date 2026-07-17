@@ -106,6 +106,11 @@ enum Tokens {
     static let grid = Color(hex: "#dce3ea")
     static let axisLabel = Color(lightHex: "#697586", darkHex: "#9AA4B2")
 
+    // Buitenrand van de grafiek-plot. In dark mag dit donkerder zodat het witte
+    // grafiekvlak een duidelijke rand krijgt tegen de donkere sheet; de interne
+    // gridlines blijven wél licht (`grid`), want die liggen over het witte vlak.
+    static let chartBorder = Color(lightHex: "#dce3ea", darkHex: "#3A414C")
+
     // Vaste lichte basis áchter de lucht-gradient in de grafiek. De celkleuren
     // zijn semi-transparant en werden ontworpen om over wit te liggen; zonder
     // deze basis zouden ze in dark mode over het donkere oppervlak vertroebelen
