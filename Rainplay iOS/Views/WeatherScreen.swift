@@ -8,6 +8,8 @@ struct WeatherScreen: View {
     @State private var locationMenuOpen = false
     @Environment(\.colorScheme) private var colorScheme
 
+    private static let openMeteoURL = URL(string: "https://open-meteo.com")!
+
     /// All derived header information computed in one pass: temperature, date,
     /// best-moment window and advice text. See DecisionSummary.
     private var summary: DecisionSummary {
@@ -193,7 +195,7 @@ struct WeatherScreen: View {
             .padding(.horizontal, 8)
             .padding(.top, 5)
 
-            Link("Weather data by Open-Meteo", destination: URL(string: "https://open-meteo.com")!)
+            Link("Weather data by Open-Meteo", destination: Self.openMeteoURL)
                 .font(.system(size: 12))
                 .foregroundStyle(Tokens.inkSoft)
                 .padding(.top, 14)

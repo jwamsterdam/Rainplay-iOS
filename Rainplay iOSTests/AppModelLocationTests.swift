@@ -8,7 +8,7 @@ import Testing
 @MainActor
 struct AppModelLocationTests {
     @MainActor final class StubForecastProvider: ForecastProviding {
-        func fetchForecast(_ location: ForecastLocation) async throws -> Forecast {
+        func fetchForecast(_: ForecastLocation) async throws -> Forecast {
             Forecast(currentTemperature: 0, hourly: [], minutely15: [], sunriseTimes: [:], sunsetTimes: [:])
         }
     }

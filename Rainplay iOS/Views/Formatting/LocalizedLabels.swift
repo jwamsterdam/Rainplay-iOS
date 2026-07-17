@@ -78,15 +78,6 @@ extension WeatherKind {
         }
     }
 
-    var titleKey: LocalizedStringKey {
-        switch self {
-        case .rain: return "weather.rain"
-        case .cloud: return "weather.cloud"
-        case .partly: return "weather.partly"
-        case .sun: return "weather.sun"
-        }
-    }
-
     /// Resolved, localized weather-type text — for labels assembled from multiple
     /// parts (such as the VoiceOver text in DayChart).
     var localizedText: String { String(localized: resource) }

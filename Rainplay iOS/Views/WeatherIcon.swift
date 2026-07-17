@@ -15,7 +15,7 @@ struct WeatherIcon: View {
         icon
             .font(.system(size: size * 0.9))
             .frame(width: size, height: size)
-            .accessibilityLabel(Text(kind.titleKey))
+            .accessibilityLabel(Text(kind.resource))
     }
 
     @ViewBuilder
