@@ -59,6 +59,12 @@ struct DayChart: View {
         .chartYAxis(showRain || showTemp ? .automatic : .hidden)
         .chartBackground { proxy in
             plotRect(proxy) { rect in
+                // Vaste witte basis zodat de semi-transparante lucht-gradient in
+                // licht én donker over hetzelfde wit composeert (zie chartPlotBase).
+                Rectangle()
+                    .fill(Tokens.chartPlotBase)
+                    .frame(width: rect.width, height: rect.height)
+                    .position(x: rect.midX, y: rect.midY)
                 SkyGradientBackground(hours: hours, colors: cellColors, twilightRadiation: twilightRadiation)
                     .frame(width: rect.width, height: rect.height)
                     .position(x: rect.midX, y: rect.midY)

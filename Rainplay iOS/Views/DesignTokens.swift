@@ -100,9 +100,17 @@ enum Tokens {
     static let scoreLow = Color(hex: "#f3b329")
     static let scoreBad = Color(hex: "#e15d4f")
 
-    // Grafiek-lijnkleuren
-    static let grid = Color(lightHex: "#dce3ea", darkHex: "#3A404A")
+    // Grafiek-lijnkleuren. `grid` ligt binnen de plot (over de vaste witte basis
+    // van de grafiek) en blijft daarom in beide modi gelijk; alleen de aslabels
+    // eromheen — op de sheet — worden adaptief zodat ze op donker leesbaar zijn.
+    static let grid = Color(hex: "#dce3ea")
     static let axisLabel = Color(lightHex: "#697586", darkHex: "#9AA4B2")
+
+    // Vaste lichte basis áchter de lucht-gradient in de grafiek. De celkleuren
+    // zijn semi-transparant en werden ontworpen om over wit te liggen; zonder
+    // deze basis zouden ze in dark mode over het donkere oppervlak vertroebelen
+    // en zou je de zon-/luchtkleuren niet meer zien.
+    static let chartPlotBase = Color(hex: "#ffffff")
     static let tempAxisLabel = Color(hex: "#ff8a3d")
     static let nowMarker = Color(hex: "#ff3b30")
 
