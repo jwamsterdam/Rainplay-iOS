@@ -152,7 +152,7 @@ struct DayChart: View {
     @AxisContentBuilder
     private var xAxis: some AxisContent {
         let labels = tickLabels
-        return AxisMarks(values: hours.map(\.time)) { value in
+        AxisMarks(values: hours.map(\.time)) { value in
             AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 5]))
                 .foregroundStyle(Tokens.grid)
             AxisValueLabel {
