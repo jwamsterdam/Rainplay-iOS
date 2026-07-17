@@ -136,6 +136,29 @@ outputs, or ownership before writing more code.
 - Avoid pixel-perfect unit tests. Test transformation contracts, visibility,
   empty states, and edge cases (see docs/ai/testing-conventions.md).
 
+## Localization & locale
+
+- **No hardcoded user-facing strings.** Use `LocalizedStringKey` in views
+  (`Text("some.key")`) and `LocalizedStringResource` for text produced outside a
+  view. Every key has an entry in `Localizable.xcstrings` with an English source
+  value, a Dutch translation, and a translator comment.
+- Keys are symbolic and dotted (e.g. `settings.title`, `hero.outsideFrom %@`).
+  Interpolate with placeholders (`%@`, `%lld`) — never assemble sentences by
+  string concatenation, so word order and capitalization are the translation's job.
+- The domain layer (`Logic/`, `Models/`) must not emit localized sentences. It
+  returns semantic tokens (enums like `OutdoorSummary`, `DayPeriod`,
+  `WeatherKind`); those are mapped to localized text only in
+  `Views/Formatting/LocalizedLabels.swift`.
+- Units, times, and dates are formatted at the presentation boundary
+  (`Views/Formatting/`) driven by the user's Settings choice; `.system` resolves
+  from the locale (e.g. US → °F / 12-hour). Keep locale-specific formatting out
+  of `Logic/`.
+- Enum `rawValue`s used for persistence/identity (`DayOption`, `HorizonOption`,
+  `LocationSource`) are never shown to the user — display goes through a
+  localized `titleKey`. Do not change those rawValues to localize a label.
+- Development region is English; Dutch is an added localization, so the app uses
+  the device language when available and otherwise falls back to English.
+
 ## Dependencies
 
 - Do not add a production dependency until platform APIs and current project

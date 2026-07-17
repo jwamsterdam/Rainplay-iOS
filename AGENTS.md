@@ -107,9 +107,21 @@ Rules of thumb:
 - Horizon selectors: `Hele dag`, `+6 uur`, `+2 uur`.
 - The chart is the main decision visualization.
 
+## Localization & locale preferences
+
+The app is localized: **English (source) + Dutch** via `Localizable.xcstrings`,
+development region English (device language if available, else English). All
+user-facing text is localizable — no hardcoded strings; the domain layer emits
+semantic tokens localized in `Views/Formatting/LocalizedLabels.swift`. The
+Settings sheet exposes temperature unit (°C/°F), time format (12/24h), date
+format, and a Language row that opens the iOS per-app language screen; each
+`System` option follows the device/region. See docs/ai/coding-standards.md
+(Localization & locale) and docs/ai/definition-of-done.md. Copy stays direct and
+calm; Dutch examples below.
+
 ## UI Copy Direction
 
-Use Dutch copy. Keep it direct and calm. Examples:
+Use direct, calm copy (English source + Dutch translation). Examples:
 - `Buiten vanaf 14:00`
 - `Wacht tot de middag`
 - `Nu goed naar buiten`

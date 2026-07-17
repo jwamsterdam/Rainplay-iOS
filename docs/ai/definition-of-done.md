@@ -55,11 +55,25 @@ silently skip it.
 - Interactive UI has meaningful labels, correct traits, adequate touch targets,
   and supports Dynamic Type where text is shown.
 
-## 7. Change hygiene
+## 7. Localization & locale
+- **No hardcoded user-facing text.** Every new string is a `LocalizedStringKey`
+  (or `LocalizedStringResource` off the view), with an entry in
+  `Localizable.xcstrings` — English source **and** Dutch — with a translator
+  comment. Never build sentences by concatenation; use placeholders (`%@`, `%lld`).
+- Domain layer stays presentation-free: `Logic/`/`Models/` emit semantic tokens
+  (e.g. `OutdoorSummary`, `DayPeriod`, `WeatherKind`), localized only in
+  `Views/Formatting/LocalizedLabels.swift`.
+- Units and date/time honor the user's Settings choices and fall back to the
+  locale for `.system` (see `MeasurementFormatting` / `TimeFormatting`); no
+  locale hardcoded in `Logic/`.
+- Enum `rawValue`s used for persistence/identity are never displayed directly —
+  display goes through a localized `titleKey`.
+
+## 8. Change hygiene
 - The diff is focused; no unrelated rewrites or formatting churn.
 - Existing worktree edits by the user/teammates are preserved.
 
-## 8. Reporting
+## 9. Reporting
 - The final response lists: changed files, commands run and their results,
   SonarCloud status for the change, known risks, and remaining follow-ups.
 
@@ -68,6 +82,7 @@ Done requires, at minimum:
 - tests pass;
 - build is green;
 - SwiftLint and SwiftFormat report no issues on the change;
+- no hardcoded user-facing text — new strings are in Localizable.xcstrings (en + nl);
 - Test Engineer: no blocking issues;
 - Software Architect: no blocking issues;
 - SonarCloud: quality gate green, no new issues, all issues resolved or
