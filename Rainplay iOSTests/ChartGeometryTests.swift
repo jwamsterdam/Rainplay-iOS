@@ -74,8 +74,16 @@ struct ChartGeometryTests {
     @Test func rainAxisGrowsAboveThree() {
         // Flinke bui (5,4 mm) → as groeit mee zodat balken niet buiten beeld lopen.
         let geo = ChartGeometry(hours: hours([18, 20], precip: [5.4, 2.0]))
-        #expect(geo.rainMax == 6)                 // ⌈5,4⌉
+        #expect(geo.rainMax == 6)                 // ⌈5,4 + 0,5⌉
         #expect(geo.rainTicks.last == geo.rainMax) // bovenste regenwaarde zichtbaar
+    }
+
+    @Test func rainAxisLeavesHeadroomAbovePeak() {
+        // Een piek die exact op een heel getal valt (bijv. de week-cap van 3 mm)
+        // krijgt marge: de as wordt 4, zodat de balk de bovenrand niet raakt.
+        let geo = ChartGeometry(hours: hours([18, 20], precip: [3.0, 0.0]))
+        #expect(geo.rainMax == 4)                 // ⌈3,0 + 0,5⌉
+        #expect(geo.rainMax > 3.0)                // strikt boven de piek
     }
 
     @Test func temperatureIsInverseOfNormalize() {

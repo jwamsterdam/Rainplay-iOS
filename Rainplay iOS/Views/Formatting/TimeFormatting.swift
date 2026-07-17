@@ -83,3 +83,9 @@ func weekRangeLabel(from: Date, to: Date, style: DateStyle, locale: Locale = .cu
 func weekdayLabel(date: Date, locale: Locale = .current) -> String {
     date.formatted(.dateTime.weekday(.abbreviated).locale(locale))
 }
+
+// Volledige weekdagnaam ("woensdag" / "Wednesday"), locale-aware. Gebruikt in de
+// week-weergave waar de kop een dag toont i.p.v. een tijdstip.
+func weekdayName(date: Date, locale: Locale = .current) -> String {
+    date.formatted(.dateTime.weekday(.wide).locale(locale))
+}

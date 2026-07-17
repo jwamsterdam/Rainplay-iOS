@@ -15,6 +15,11 @@ struct ChartGeometry: Equatable {
     // Vaste ondergrens van de regen-as.
     static let minimumRainMax: Double = 3
 
+    // Marge (mm) die boven de hoogste bar wordt opgeteld vóór het omhoog afronden,
+    // zodat een balk de bovenrand van de grafiek nooit raakt (bijv. een week-piek
+    // van precies 3 mm wordt een as van 4 i.p.v. 3).
+    static let rainHeadroomMm: Double = 0.5
+
     // Uit een expliciet temperatuurbereik + neerslagpiek (de gemeten data). Zo kan
     // één gedeelde geometrie over alle dag-panelen worden gebruikt, zodat de
     // grafieken vergelijkbaar zijn bij het swipen.
@@ -23,7 +28,7 @@ struct ChartGeometry: Equatable {
     // een strakke ~1° (niet opgerond naar even, dat gaf tot ~3° lucht) zodat de
     // lijn dicht bij de bovenrand komt en een warme dag ook echt "hoog" oogt.
     init(temperatureRange range: ClosedRange<Double>?, precipitationMax: Double?) {
-        rainMax = max(Self.minimumRainMax, (precipitationMax ?? 0).rounded(.up))
+        rainMax = max(Self.minimumRainMax, ((precipitationMax ?? 0) + Self.rainHeadroomMm).rounded(.up))
 
         guard let range else {
             tempMin = 0

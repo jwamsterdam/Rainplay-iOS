@@ -129,7 +129,12 @@ struct WeatherScreen: View {
                 // Alleen tonen wanneer er een echt venster is; bij lege/mislukte
                 // data draagt de samenvatting de boodschap i.p.v. "Buiten vanaf --:--".
                 if let bestStart = summary.bestStart {
-                    Text("hero.outsideFrom \(timeString(date: bestStart, format: model.timeFormat))")
+                    // In de week-weergave toont de kop een dag ("Buiten vanaf
+                    // woensdag") i.p.v. een tijdstip; overige dagen een tijd.
+                    let startText = model.selectedDay == .week
+                        ? weekdayName(date: bestStart)
+                        : timeString(date: bestStart, format: model.timeFormat)
+                    Text("hero.outsideFrom \(startText)")
                         .font(.system(size: 30, weight: .heavy))
                         .foregroundStyle(Tokens.inkStrong)
                         .lineLimit(1)
