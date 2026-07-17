@@ -42,6 +42,16 @@ struct TimeFormattingTests {
         #expect(normalized(timeString(isoTime: iso(12), format: .twelveHour, locale: us)) == "12:00 PM")
     }
 
+    // MARK: - As-labels zonder AM/PM
+
+    @Test func axisTimeOmitsAmPm() {
+        // Compacte x-as: 12-uurs zonder AM/PM, 24-uurs blijft HH:mm.
+        let twelve = normalized(axisTimeString(isoTime: iso(13), format: .twelveHour, locale: us))
+        #expect(twelve == "1:00")
+        #expect(!twelve.contains("PM") && !twelve.contains("AM"))
+        #expect(axisTimeString(isoTime: iso(13), format: .twentyFourHour, locale: us) == "13:00")
+    }
+
     // MARK: - .system volgt de locale
 
     @Test func systemUses24HourInNL() {

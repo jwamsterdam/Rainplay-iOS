@@ -32,6 +32,22 @@ func timeString(date: Date, format: TimeFormat, locale: Locale = .current) -> St
     }
 }
 
+// Compacte tijd voor de grafiek-x-as: dezelfde 12/24-uurs-keuze, maar zónder
+// AM/PM-achtervoegsel — de as-labels zijn smal en geroteerd, dus "2:00" i.p.v.
+// "2:00 PM". Alleen voor visuele as-labels; VoiceOver houdt de volledige tijd.
+func axisTimeString(isoTime: String, format: TimeFormat, locale: Locale = .current) -> String {
+    let date = IsoTime.date(isoTime)
+    let symbol = Date.FormatStyle.Symbol.Hour.defaultDigits(amPM: .omitted)
+    switch format {
+    case .system:
+        return date.formatted(.dateTime.hour(symbol).minute().locale(locale))
+    case .twelveHour:
+        return date.formatted(.dateTime.hour(symbol).minute().locale(forcedHourCycle: locale, use24Hour: false))
+    case .twentyFourHour:
+        return date.formatted(.dateTime.hour(symbol).minute().locale(forcedHourCycle: locale, use24Hour: true))
+    }
+}
+
 private extension Date.FormatStyle {
     // Dwingt de 12/24-uurs-cyclus af door een locale met een expliciete
     // hourCycle mee te geven; behoudt verder taal (AM/PM-symbolen, scheiding)

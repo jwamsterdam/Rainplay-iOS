@@ -34,11 +34,11 @@ struct DayChart: View {
         Dictionary(hours.map { ($0.time, tickLabel(for: $0)) }, uniquingKeysWith: { first, _ in first })
     }
 
-    // Uur-punten ("HH:mm") → tijd in de gekozen notatie; week-punten (dagsleutel
-    // zonder ":") → locale-aware weekdag-afkorting.
+    // Uur-punten ("HH:mm") → compacte tijd zónder AM/PM (smalle, geroteerde
+    // as); week-punten (dagsleutel zonder ":") → locale-aware weekdag-afkorting.
     private func tickLabel(for hour: HourlyWeather) -> String {
         if hour.time.contains(":") {
-            return timeString(isoTime: hour.isoTime, format: timeFormat)
+            return axisTimeString(isoTime: hour.isoTime, format: timeFormat)
         }
         return weekdayLabel(date: IsoTime.date(hour.isoTime))
     }
