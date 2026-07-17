@@ -160,7 +160,11 @@ struct DayChart: View {
                     Text(labels[key] ?? key)
                         .font(.system(size: 11))
                         .foregroundStyle(Tokens.axisLabel)
-                        .fixedSize()
+                        .lineLimit(1)
+                        // Uniforme breedte vóór de -90°-rotatie + trailing-uitlijning:
+                        // daardoor lijnen de bovenkanten van álle labels uit, ook bij
+                        // 12-uurs labels van wisselende lengte ("2:00" vs "12:00").
+                        .frame(width: 40, alignment: .trailing)
                         .rotationEffect(.degrees(-90))
                         .frame(width: 16, height: 40)
                 }
@@ -218,7 +222,8 @@ private struct ChartScoreIconRows: View {
                     .position(x: x, y: rect.minY - topRowsHeight + 16)
                 if showIcons {
                     WeatherIcon(kind: hour.kind, size: 20)
-                        .position(x: x, y: rect.minY - topRowsHeight + 40)
+                        // Iets lager: meer lucht tussen score en icoon, minder eronder.
+                        .position(x: x, y: rect.minY - topRowsHeight + 44)
                         .accessibilityLabel(Text("a11y.timeWeather \(spokenTime(hour)) \(hour.kind.localizedText)"))
                 }
             }
