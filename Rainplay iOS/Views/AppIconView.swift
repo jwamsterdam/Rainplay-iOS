@@ -1,7 +1,6 @@
 import SwiftUI
 
-// Nagebouwde versie van public/app-icon.svg uit de PWA, in een 512×512-canvas.
-// Wordt met ImageRenderer naar een 1024px PNG geëxporteerd voor de AppIcon.
+/// App icon artwork on a 512×512 canvas, exported to a 1024px PNG via ImageRenderer.
 struct AppIconView: View {
     var body: some View {
         ZStack {
@@ -37,7 +36,6 @@ struct AppIconView: View {
         .frame(width: 512, height: 512)
     }
 
-    // Port van het wolk-pad uit de SVG (relatieve cubic beziers → absolute punten).
     private var cloud: Path {
         var p = Path()
         p.move(to: CGPoint(x: 138, y: 316))

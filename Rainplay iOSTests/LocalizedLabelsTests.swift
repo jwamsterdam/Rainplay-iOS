@@ -2,9 +2,9 @@ import Foundation
 @testable import Rainplay_iOS
 import Testing
 
-// Bewaakt dat elke presentatie-token een echte (opgeloste) vertaling heeft in de
-// String Catalog: als een key ontbreekt geeft String(localized:) de ruwe key
-// terug (bijv. "weather.rain"), en dan faalt de assertie.
+/// Guards that every presentation token has a real (resolved) translation in the
+/// String Catalog: when a key is missing, String(localized:) returns the raw key
+/// (e.g. "weather.rain") and the assertion fails.
 struct LocalizedLabelsTests {
     @Test func weatherKindsResolveToRealText() {
         for kind in [WeatherKind.rain, .cloud, .partly, .sun] {

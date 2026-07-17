@@ -1,8 +1,5 @@
 import Foundation
 
-// Dag/horizon-weergavelogica, 1:1 geport uit de PWA
-// (src/lib/weatherView.ts + src/config/weatherSettings.ts).
-
 enum WeatherViewSettings {
     static let dayChartStartHour = 0
     static let dayChartEndHour = 24
@@ -28,7 +25,7 @@ func visiblePointsForTodayHorizon(
 
     let start = niceStartIndex(minutely15, now: now)
 
-    // +6 uur: elke 30 min (om het andere 15-min-punt) → 12 punten.
+    // +6h: every 30 min (every other 15-min point) → 12 points.
     let plus6 = Array(minutely15.dropFirst(start).prefix(24))
         .enumerated()
         .filter { $0.offset % 2 == 0 }
@@ -36,17 +33,16 @@ func visiblePointsForTodayHorizon(
 
     if horizon == .plus6 { return plus6 }
 
-    // +2 uur: het venster van ~2 uur, geïnterpoleerd naar hetzelfde aantal punten
-    // als +6 (12), zodat de grafiek bij het wisselen van horizon en het swipen
-    // 1-op-1 kan "morphen" i.p.v. punten te moeten zoeken.
+    // +2h: the ~2-hour window resampled to the same point count as +6 (12) so the
+    // chart can morph one-to-one when switching horizon or swiping.
     let plus2Window = Array(minutely15.dropFirst(start).prefix(8))
     return resampled(plus2Window, to: plus6.count)
 }
 
-// Herbemonstert een tijdreeks naar `count` gelijkmatig over de tijd verdeelde
-// punten. De geplotte meetwaarden (temp, neerslag, kans, bewolking, straling)
-// worden lineair geïnterpoleerd; de categorische velden (kind, isDay, score,
-// zonsondergang) komen van het dichtstbijzijnde bronpunt.
+/// Resamples a time series to `count` points spread evenly over time. Plotted
+/// measurements (temp, precip, probability, cloud, radiation) are linearly
+/// interpolated; categorical fields (kind, isDay, score, sunset) come from the
+/// nearest source point.
 func resampled(_ points: [ForecastPoint], to count: Int) -> [ForecastPoint] {
     guard points.count >= 2, count >= 2 else { return points }
     let times = points.map { IsoTime.ms($0.isoTime) }
@@ -87,16 +83,15 @@ private func interpolatedPoint(atMs target: Double, times: [Double], points: [Fo
     )
 }
 
+/// Finds the last :00/:30 point at or before now, so the window always starts in
+/// the recent past and the now-line falls inside the chart rather than pinned to
+/// the left edge. Points are chronological, so we scan forward and keep the
+/// highest match. Falls back to index 0 (current quarter) when no :00/:30 lies at
+/// or before now, e.g. data starting in a :15/:45 period.
+///
+/// Compares on isoTime (including date) so data crossing midnight (e.g. 23:45 →
+/// 00:00 next day) does not disturb the :00/:30 minute check.
 private func niceStartIndex(_ points: [ForecastPoint], now: Date) -> Int {
-    // Zoek het LAATSTE :00/:30-punt op of vóór nu, zodat het venster altijd in
-    // het recente verleden begint en de nu-lijn ín de grafiek valt in plaats van
-    // op de linkerrand vast te zitten. Punten zijn chronologisch, dus we scannen
-    // vooruit en houden de hoogste match. Valt terug op index 0 (huidig
-    // kwartier) als er geen :00/:30 op of vóór nu ligt — bijv. data die in een
-    // :15/:45-periode begint.
-    //
-    // Vergelijkt op isoTime (incl. datum) zodat data over middernacht heen
-    // (bijv. 23:45 → 00:00 volgende dag) de :00/:30-minuutcheck niet verstoort.
     let nowMs = now.timeIntervalSince1970 * 1000
     var last = -1
     for (i, point) in points.enumerated() {
@@ -119,10 +114,10 @@ func visibleHoursForSelection(
     return visibleHoursForHorizon(dayHours, horizon)
 }
 
-// Enige bron van waarheid voor "welke punten toont het scherm voor deze
-// dag/horizon". Zowel de kop (WeatherScreen) als elk carousel-paneel (DayCarousel)
-// leest hieruit, zodat er niet twee licht verschillende pipelines bestaan.
-// `now` wordt geïnjecteerd i.p.v. binnenin Date() te lezen.
+/// Single source of truth for which points the screen shows for a given
+/// day/horizon. Both the header (WeatherScreen) and each carousel panel
+/// (DayCarousel) read from this, so there are not two slightly different
+/// pipelines. `now` is injected rather than read internally via Date().
 func visiblePoints(
     forecast: Forecast?,
     day: DayOption,
@@ -146,9 +141,9 @@ func averageTemperature(_ hours: [HourlyWeather]) -> Int? {
     return Int(average(hours.map(\.temperatureC)).rounded())
 }
 
-// Canonieke kop-datum voor de gekozen dag: één datum, of een week-bereik. De
-// view formatteert dit via TimeFormatting (locale-aware) i.p.v. een vooraf
-// gerenderde string. `.none` = geen data.
+/// Header date for the selected day: a single date, or a week range. The view
+/// formats this via TimeFormatting (locale-aware) rather than a pre-rendered
+/// string. `.none` means no data.
 enum HeaderDate: Equatable {
     case none
     case single(Date)
@@ -221,7 +216,7 @@ private func configuredDayHours(_ hours: [HourlyWeather]) -> [HourlyWeather] {
 }
 
 private func weekDaySummaries(_ hours: [HourlyWeather]) -> [HourlyWeather] {
-    // Groepeer per datum met behoud van volgorde (zoals Map in de PWA).
+    // Group by date while preserving order.
     var order: [String] = []
     var groups: [String: [HourlyWeather]] = [:]
 
@@ -246,8 +241,8 @@ private func summarizeDay(_ date: String, _ dayHours: [HourlyWeather]) -> Hourly
 
     var summary = bestHour
     summary.isoTime = "\(date)T12:00"
-    // Identiteits-`time` = de dagsleutel (uniek per dag, stabiele grafiek-as-
-    // categorie). De view formatteert de weekdag locale-aware uit isoTime.
+    // Identity `time` is the day key: unique per day and a stable chart-axis
+    // category. The view formats the weekday locale-aware from isoTime.
     summary.time = date
     summary.temperatureC = average(dayHours.map(\.temperatureC)).rounded()
     summary.score = Int(average(dayHours.map { Double($0.score) }).rounded())
@@ -260,7 +255,7 @@ private func summarizeDay(_ date: String, _ dayHours: [HourlyWeather]) -> Hourly
     return summary
 }
 
-// Bepaalt het dag-icoon uit de telling per soort uur, in prioriteitsvolgorde.
+/// Picks the day icon from the per-kind hour counts, in priority order.
 private func dominantKind(rainyHours: Int, sunnyHours: Int, partlyHours: Int) -> WeatherKind {
     if rainyHours >= 3 { return .rain }
     if sunnyHours >= partlyHours && sunnyHours > 0 { return .sun }

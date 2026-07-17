@@ -1,9 +1,7 @@
 import SwiftUI
 
-// Capsule-segmented-control in PWA-stijl (src/components/SegmentedControl.tsx +
-// .segmented in styles.css): lichtgrijs spoor, witte thumb met schaduw die met
-// matchedGeometryEffect naar de actieve optie animeert.
-
+/// Capsule segmented control: a light gray track with a shadowed thumb that
+/// animates to the active option via matchedGeometryEffect.
 struct SegmentedControl<Option: Identifiable & Equatable>: View {
     let options: [Option]
     @Binding var selection: Option
@@ -11,7 +9,7 @@ struct SegmentedControl<Option: Identifiable & Equatable>: View {
     var disabled: Bool = false
 
     @Namespace private var indicator
-    // Schaalt mee met de Dynamic Type-voorkeur (t.o.v. .body).
+    /// Scales with the Dynamic Type preference, relative to .body.
     @ScaledMetric(relativeTo: .body) private var fontSize: CGFloat = 16
 
     var body: some View {
@@ -25,9 +23,9 @@ struct SegmentedControl<Option: Identifiable & Equatable>: View {
                     }
                 } label: {
                     Text(label(option))
-                        // label is een LocalizedStringKey; unit-symbolen (°C/°F)
-                        // en enkele afkortingen zijn taal-neutraal en staan als
-                        // key == waarde in de catalog.
+                        // label is a LocalizedStringKey; unit symbols (°C/°F) and
+                        // some abbreviations are language-neutral and stored as
+                        // key == value in the catalog.
                         .font(.system(size: fontSize, weight: isActive ? .semibold : .medium))
                         .foregroundStyle(isActive ? Tokens.ink : Tokens.segmentInactive)
                         .lineLimit(1)

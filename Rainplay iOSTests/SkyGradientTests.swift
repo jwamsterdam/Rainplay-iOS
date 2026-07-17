@@ -1,7 +1,6 @@
 @testable import Rainplay_iOS
 import Testing
 
-// Port van src/lib/chart.gradient.test.ts uit de PWA.
 struct SkyGradientTests {
     private let colors = CellColors(
         sun: RGBAColor(r: 255, g: 196, b: 0, a: 0.24),
@@ -55,7 +54,7 @@ struct SkyGradientTests {
         func atOffset(_ iso: String) -> HourlyWeather {
             hour(.cloud, isDay: false, radiation: 0, iso: iso, sunsetMs: sunsetMs)
         }
-        #expect(close(skyBrightness(atOffset("2026-06-14T20:00")), 1))       // 0 min na zonsondergang
+        #expect(close(skyBrightness(atOffset("2026-06-14T20:00")), 1))       // 0 min after sunset
         #expect(close(skyBrightness(atOffset("2026-06-14T20:15")), 0.8))     // 15/75
         #expect(close(skyBrightness(atOffset("2026-06-14T20:45")), 0.4))     // 45/75
         #expect(close(skyBrightness(atOffset("2026-06-14T21:15")), 0))       // 75 min

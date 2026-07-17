@@ -1,10 +1,9 @@
 import Foundation
 import os
 
-// Gecentraliseerde os.Logger-categorieën per laag. Zichtbaar in Console.app en de
-// Xcode-console, filterbaar op subsystem/category — zodat problemen bij anderen
-// (of op afstand) te diagnosticeren zijn zonder de gebruiker met technische
-// details lastig te vallen in de UI.
+/// Centralized os.Logger categories per layer. Visible in Console.app and the Xcode
+/// console and filterable by subsystem/category, so issues can be diagnosed remotely
+/// without surfacing technical detail in the UI.
 enum AppLog {
     private static let subsystem = Bundle.main.bundleIdentifier ?? "Rainplay"
 

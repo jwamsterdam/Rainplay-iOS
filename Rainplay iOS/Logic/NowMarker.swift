@@ -1,34 +1,24 @@
 import Foundation
 
-// Pure, klok-geïnjecteerde positiehelper voor de "nu"-marker op de grafiek.
-// 1:1 geport uit de PWA (src/lib/nowMarker.ts).
-//
-// De grafiek verdeelt n punten volgens een banden-model: punt i beslaat de band
-// [i/n, (i+1)/n] en zijn CENTRUM ligt op fractie (i + 0.5)/n over de plot
-// (hetzelfde model als de lucht-gradient, zie SkyGradient.swift). Deze functie
-// geeft terug waar de huidige kloktijd in dat model valt als fractie in [0,1];
-// de view projecteert dat naar pixels: x = plotX + fractie * plotBreedte.
-//
-// `now` wordt geïnjecteerd (nooit intern Date() lezen) zodat de berekening
-// deterministisch en unit-testbaar is.
-//
-// Vergelijkt op volledige isoTime (datum + tijd) zodat vensters over middernacht
-// (bijv. +6 uur: 23:00 → 04:30 de volgende dag) correct werken — een kale
-// minuten-sinds-middernacht-vergelijking breekt daar, omdat 0:00 (0) vóór
-// 23:00 (1380) sorteert en de marker om middernacht naar de rechterrand springt.
-
-/// Horizontale positie van `now` als fractie in [0,1] over de plot, volgens het
-/// band-centrum-model: het centrum van punt i ligt op (i + 0.5)/n.
+/// Horizontal position of `now` as a fraction in [0,1] across the plot, using the
+/// band-center model: the center of point i sits at (i + 0.5)/n (the same model as
+/// the sky gradient, see SkyGradient.swift). The view projects this to pixels:
+/// x = plotX + fraction * plotWidth.
 ///
-/// Interpoleert in tijd tussen de twee omsluitende punten, dus het resultaat is
-/// ((i + 0.5) + t)/n waarbij t de tijdfractie tussen punt i en i+1 is.
+/// Interpolates in time between the two enclosing points, so the result is
+/// ((i + 0.5) + t)/n where t is the time fraction between point i and i+1.
 ///
-/// Het resultaat wordt GECLAMPT naar [0,1]: valt `now` vóór het eerste punt
-/// (bijv. een +2/+6-uur-venster dat net na nu begint) dan pint hij op de
-/// linkerrand; valt hij ná het laatste punt dan op de rechterrand.
+/// The result is clamped to [0,1]: if `now` falls before the first point (e.g. a
+/// +2/+6-hour window starting just after now) it pins to the left edge; after the
+/// last point it pins to the right edge.
 ///
-/// Geeft ALLEEN nil terug bij degenereerde invoer (minder dan 2 punten — dan
-/// valt er niets te interpoleren); de aanroeper rendert dan niets.
+/// Returns nil only for degenerate input (fewer than 2 points, nothing to
+/// interpolate); the caller then renders nothing.
+///
+/// Compares on full isoTime (date + time) so windows crossing midnight (e.g.
+/// +6h: 23:00 → 04:30 next day) work correctly. A bare minutes-since-midnight
+/// comparison breaks here because 0:00 sorts before 23:00, jumping the marker to
+/// the right edge at midnight.
 func nowFraction(isoTimes: [String], now: Date) -> Double? {
     let n = isoTimes.count
     guard n >= 2 else { return nil }
@@ -36,8 +26,8 @@ func nowFraction(isoTimes: [String], now: Date) -> Double? {
     let nowMs = now.timeIntervalSince1970 * 1000
     let timestamps = isoTimes.map { IsoTime.ms($0) }
 
-    // Zoek de laatste bracket i waarvoor timestamps[i] <= nowMs.
-    // timestamps is monotoon stijgend (middernacht-veilig via isoTime-datums).
+    // Find the last bracket i where timestamps[i] <= nowMs. timestamps is
+    // monotonically increasing (midnight-safe via isoTime dates).
     var i = 0
     while i < n - 2 && timestamps[i + 1] <= nowMs { i += 1 }
     var span = timestamps[i + 1] - timestamps[i]

@@ -1,17 +1,12 @@
 import Foundation
 import os
 
-// Open-Meteo forecast-client, geport uit de PWA
-// (src/api/openMeteo.ts + src/api/schemas/openMeteoSchema.ts).
-// Codable vervangt de Zod-runtimevalidatie.
-
 enum ForecastError: Error, Equatable {
     case timeout
     case httpStatus(Int)
     case unexpectedStructure
 
-    // HTTP-status zodat de fetch-laag kan besluiten een 4xx (vooral 429
-    // rate-limit) NIET opnieuw te proberen.
+    /// HTTP status, so the fetch layer can skip retrying a 4xx (notably a 429 rate limit).
     var status: Int? {
         if case .httpStatus(let code) = self { return code }
         return nil
@@ -20,12 +15,11 @@ enum ForecastError: Error, Equatable {
 
 private let forecastURL = "https://api.open-meteo.com/v1/forecast"
 
-// Breek een blijvend hangend verzoek af zodat de fetch faalt in plaats van
-// eeuwig in "laden" te blijven. ~10 s is ruim voor een mobiele radio en maakt
-// een echte storing toch snel zichtbaar.
+/// Aborts a stalled request so the fetch fails instead of loading forever.
+/// ~10s is generous for a mobile radio while still surfacing real outages quickly.
 private let fetchTimeoutSeconds: TimeInterval = 10
 
-// MARK: - Response-structuur (spiegelt openMeteoSchema.ts)
+// MARK: - Response structure
 
 private struct OpenMeteoResponse: Decodable {
     struct Daily: Decodable {
@@ -42,10 +36,9 @@ private struct OpenMeteoResponse: Decodable {
         }
     }
 
-    // Alleen `time` en `temperature2m` zijn hard vereist; de rest is optioneel
-    // zodat een geldige respons waarin Open-Meteo één veld weglaat (komt voor bij
-    // bepaalde modellen/locaties) niet de héle decode laat falen. numberAt vult
-    // een ontbrekend veld met de fallback 0 — net als de Zod-tolerantie in de PWA.
+    /// Only `time` and `temperature2m` are required; the rest are optional so a valid
+    /// response that omits a field (which Open-Meteo does for some models/locations)
+    /// does not fail the whole decode. `numberAt` fills a missing field with 0.
     struct Hourly: Decodable {
         let time: [String]
         let temperature2m: [Double]
@@ -101,7 +94,7 @@ private struct OpenMeteoResponse: Decodable {
 
 // MARK: - Client
 
-// Productie-implementatie van ForecastProviding. Stateless, dus Sendable.
+/// Production implementation of `ForecastProviding`. Stateless, so `Sendable`.
 struct OpenMeteoClient: ForecastProviding {
     func fetchForecast(_ location: ForecastLocation) async throws -> Forecast {
         try await fetchOpenMeteoForecast(location)
@@ -115,8 +108,7 @@ func fetchOpenMeteoForecast(_ location: ForecastLocation) async throws -> Foreca
     components.queryItems = [
         URLQueryItem(name: "latitude", value: String(location.latitude)),
         URLQueryItem(name: "longitude", value: String(location.longitude)),
-        // Vraag exact de velden op die we ook echt decoderen/gebruiken — geen
-        // dode payload op een mobiele verbinding.
+        // Request exactly the fields we decode and use to avoid dead payload on a mobile connection.
         URLQueryItem(name: "current", value: "temperature_2m"),
         URLQueryItem(name: "hourly", value: [
             "temperature_2m", "precipitation", "precipitation_probability",
@@ -139,38 +131,35 @@ func fetchOpenMeteoForecast(_ location: ForecastLocation) async throws -> Foreca
     do {
         (data, response) = try await URLSession.shared.data(for: request)
     } catch let error as URLError where error.code == .timedOut {
-        AppLog.network.warning("Open-Meteo verzoek timede out na \(fetchTimeoutSeconds, privacy: .public)s")
+        AppLog.network.warning("Open-Meteo request timed out after \(fetchTimeoutSeconds, privacy: .public)s")
         throw ForecastError.timeout
     }
 
     if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
-        AppLog.network.error("Open-Meteo gaf HTTP \(http.statusCode, privacy: .public)")
+        AppLog.network.error("Open-Meteo returned HTTP \(http.statusCode, privacy: .public)")
         throw ForecastError.httpStatus(http.statusCode)
     }
 
     return try makeForecast(from: data)
 }
 
-// Pure decode + normalisatie van een Open-Meteo-respons naar het interne
-// Forecast-model. Los van het netwerk zodat het met JSON-fixtures getest kan
-// worden (het iOS-equivalent van de aparte, testbare Zod-schema's in de PWA).
+/// Pure decode and normalization of an Open-Meteo response into the internal
+/// `Forecast` model. Separated from the network so it can be tested with JSON fixtures.
 func makeForecast(from data: Data) throws -> Forecast {
     let decoded: OpenMeteoResponse
     do {
-        // Open-Meteo levert snake_case-velden; de expliciete CodingKeys op de
-        // structs hierboven mappen die op de camelCase-properties (betrouwbaarder
-        // dan .convertFromSnakeCase, dat `temperature_2m` niet op `temperature2m`
-        // mapt).
+        // Explicit CodingKeys map Open-Meteo's snake_case onto camelCase properties;
+        // more reliable than .convertFromSnakeCase, which won't map `temperature_2m` to `temperature2m`.
         decoded = try JSONDecoder().decode(OpenMeteoResponse.self, from: data)
     } catch {
-        // Bewaar de echte decode-reden in de log; de UI ziet alleen de nette fout.
-        AppLog.network.error("Open-Meteo decode mislukt: \(error.localizedDescription, privacy: .public)")
+        // Log the real decode reason; the UI only sees the clean error.
+        AppLog.network.error("Open-Meteo decode failed: \(error.localizedDescription, privacy: .public)")
         throw ForecastError.unexpectedStructure
     }
 
-    // Datum-parsing één keer vooraf i.p.v. per punt herhaald: dit was de
-    // decode-hotspot (nearestHourlyIndexFor herparste alle 168 uur-strings vóór
-    // elk kwartierpunt = ~4000 DateFormatter-parses). Nu ~168 + 7.
+    // Parse dates once up front rather than per point: this was the decode hotspot
+    // (nearestHourlyIndexFor re-parsed all 168 hourly strings before every 15-minute
+    // point = ~4000 DateFormatter parses). Now ~168 + 7.
     let hourlyMs = decoded.hourly.time.map(IsoTime.ms)
 
     var sunriseTimes: [String: String] = [:]
@@ -201,7 +190,7 @@ func makeForecast(from data: Data) throws -> Forecast {
 
 // MARK: - Mapping
 
-// Zonsondergang (ms) voor de kalenderdag van isoTime, uit de vooraf berekende map.
+/// Sunset (ms) for the calendar day of `isoTime`, from the precomputed map.
 private func sunsetMsFor(_ isoTime: String, _ sunsetMsByDate: [String: Double]) -> Double? {
     sunsetMsByDate[String(isoTime.prefix(10))]
 }
@@ -245,7 +234,7 @@ private func toMinutelyWeather(
     hourlyMs: [Double],
     sunsetMsByDate: [String: Double]
 ) -> ForecastPoint {
-    // Temperatuur en regenkans bestaan niet per kwartier; neem het dichtstbijzijnde uur.
+    // Temperature and precipitation probability aren't available per 15 minutes; use the nearest hour.
     let nearestHourlyIndex = nearestHourlyIndexFor(hourlyMs, targetMs: IsoTime.ms(isoTime))
     let precipitationMm = numberAt(minutely.precipitation ?? [], index)
     let cloudCover = numberAt(minutely.cloudCover ?? [], index)
@@ -277,8 +266,7 @@ private func toMinutelyWeather(
     )
 }
 
-// Index van het dichtstbijzijnde uur, op basis van vooraf berekende ms-tijdstippen
-// (geen DateFormatter-parse meer per vergelijking).
+/// Index of the nearest hour, using precomputed ms timestamps (no DateFormatter parse per comparison).
 private func nearestHourlyIndexFor(_ hourlyMs: [Double], targetMs: Double) -> Int {
     var nearestIndex = 0
     var nearestDistance = Double.infinity

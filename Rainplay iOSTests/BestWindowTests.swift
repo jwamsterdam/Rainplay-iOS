@@ -2,9 +2,8 @@ import Foundation
 @testable import Rainplay_iOS
 import Testing
 
-// Port van src/lib/chart.windows.test.ts uit de PWA. Vensters dragen nu
-// canonieke Date-grenzen (start/end) i.p.v. vooraf gerenderde tijdstrings;
-// de tests toetsen daarom op het uur/minuut van die Date.
+/// Windows carry canonical Date bounds (start/end) rather than pre-rendered time
+/// strings, so these tests assert on the hour/minute of those Dates.
 struct BestWindowTests {
     private func hour(
         _ time: String,
@@ -30,7 +29,7 @@ struct BestWindowTests {
         )
     }
 
-    // Uur/minuut van een canonieke venster-Date, in de apparaat-tijdzone.
+    /// Hour/minute of a canonical window Date, in the device time zone.
     private func clock(_ date: Date?) -> String? {
         guard let date else { return nil }
         let c = Calendar.current.dateComponents([.hour, .minute], from: date)
@@ -92,8 +91,8 @@ struct BestWindowTests {
         #expect(clock(bestOutdoorWindow(hours)?.start) == "20:00")
     }
 
-    // Week-samenvattingen dragen een dagsleutel als identiteit en hebben geen
-    // intra-day eindtijd → end is nil (de view toont dan geen tijdbereik).
+    /// Week summaries use a day key as identity and have no intra-day end time,
+    /// so end is nil (the view then shows no time range).
     @Test func hasNoEndTimeForWeekSummaries() {
         let hours = [
             hour("2026-06-11", iso: "2026-06-11T12:00"),
@@ -104,7 +103,7 @@ struct BestWindowTests {
         #expect(best?.end == nil)
     }
 
-    // MARK: - outdoorSummary (semantische tokens; de view lokaliseert ze)
+    // MARK: - outdoorSummary (semantic tokens; the view localizes them)
 
     @Test func describesWindowBetweenRainyPeriods() {
         let hours = [

@@ -1,15 +1,14 @@
 import SwiftUI
 
-// Presentatie-grens tussen de presentatievrije Logic/Models-tokens en de UI.
-// Domeinlogica levert enum-tokens; hier — en alleen hier — worden die naar
-// gelokaliseerde tekst gemapt (English source keys in Localizable.xcstrings,
-// met een Nederlandse vertaling). Zo bouwt de logica geen zinnen op en blijft
-// alle vertaalbare copy in de String Catalog.
+// Presentation boundary between the presentation-free Logic/Models tokens and the UI.
+// Domain logic supplies enum tokens; here — and only here — they are mapped to
+// localized text (English source keys in Localizable.xcstrings, with a Dutch
+// translation). This keeps logic from assembling sentences and keeps all
+// translatable copy in the String Catalog.
 
 extension DayPeriod {
-    // Gebruikt in de kop-samenvatting; keys komen uit Localizable.xcstrings.
-    // LocalizedStringResource zodat het periode-woord tot een String opgelost
-    // kan worden en als placeholder in de samenvattingszin past.
+    /// `LocalizedStringResource` so the period word can be resolved to a String and
+    /// used as a placeholder inside the summary sentence.
     var resource: LocalizedStringResource {
         switch self {
         case .morning: return "period.morning"
@@ -18,14 +17,14 @@ extension DayPeriod {
         }
     }
 
-    // Opgeloste, gelokaliseerde periodetekst ("ochtend"/"morning").
+    /// Resolved, localized period text ("ochtend"/"morning").
     var localizedText: String { String(localized: resource) }
 }
 
 extension OutdoorSummary {
-    // Eén gelokaliseerde zin per token. Het periode-woord wordt eerst apart
-    // gelokaliseerd en als %@-placeholder in de zin gezet — zo plakken we geen
-    // woorden aan elkaar en kan elke taal de zinsvolgorde zelf bepalen.
+    /// One localized sentence per token. The period word is localized separately and
+    /// inserted as a %@ placeholder so words are never concatenated and each language
+    /// can decide its own word order.
     var titleKey: LocalizedStringKey {
         guard let period else { return "summary.none" }
         let localizedPeriod = period.localizedText
@@ -43,8 +42,8 @@ extension OutdoorSummary {
         }
     }
 
-    // Week-weergave: dag-georiënteerde samenvatting zónder dagperiode-woord (de
-    // kop toont al de dag). Zelfde regen-nuance-cases, andere copy.
+    /// Week view: day-oriented summary without a day-period word, since the header
+    /// already shows the day. Same rain-nuance cases, different copy.
     var weekTitleKey: LocalizedStringKey {
         switch self {
         case .none: return "summary.week.none"
@@ -55,7 +54,7 @@ extension OutdoorSummary {
         }
     }
 
-    // De dagperiode van dit token (nil voor .none).
+    /// The day period of this token (nil for `.none`).
     var period: DayPeriod? {
         switch self {
         case .none: return nil
@@ -69,7 +68,7 @@ extension OutdoorSummary {
 }
 
 extension WeatherKind {
-    // VoiceOver-label per weertype (WeatherIcon, DayChart).
+    /// VoiceOver label per weather type (WeatherIcon, DayChart).
     var resource: LocalizedStringResource {
         switch self {
         case .rain: return "weather.rain"
@@ -88,14 +87,14 @@ extension WeatherKind {
         }
     }
 
-    // Opgeloste, gelokaliseerde weertype-tekst — voor labels die uit meerdere
-    // stukken worden samengesteld (bijv. de VoiceOver-tekst in DayChart).
+    /// Resolved, localized weather-type text — for labels assembled from multiple
+    /// parts (such as the VoiceOver text in DayChart).
     var localizedText: String { String(localized: resource) }
 }
 
 extension DayOption {
-    // Volledige gelokaliseerde weergavetitel (hero-kop). rawValue blijft de
-    // (Nederlandse) stabiele identiteit/opslagsleutel; alleen weergave vertaalt.
+    /// Full localized display title (hero header). `rawValue` stays the stable
+    /// identity/storage key; only the display is translated.
     var titleKey: LocalizedStringKey {
         switch self {
         case .vandaag: return "day.today"
@@ -105,7 +104,7 @@ extension DayOption {
         }
     }
 
-    // Compacte titel voor de dag-selector: kort "Overmorgen" af, zoals de PWA.
+    /// Compact title for the day selector: abbreviates "Day after tomorrow".
     var segmentTitleKey: LocalizedStringKey {
         self == .overmorgen ? "day.dayAfterTomorrow.short" : titleKey
     }

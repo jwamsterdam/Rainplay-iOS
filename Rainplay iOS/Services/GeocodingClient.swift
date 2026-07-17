@@ -1,10 +1,9 @@
 import Foundation
 import os
 
-// Gratis, sleutelloze geocoding via Open-Meteo (dezelfde provider als de
-// forecast). Geport uit de PWA (src/api/geocoding.ts). Geeft meerdere
-// kandidaten terug zodat het locatieveld autocomplete-suggesties kan tonen.
-// Zie https://open-meteo.com/en/docs/geocoding-api
+// Free, keyless geocoding via Open-Meteo (same provider as the forecast). Returns
+// multiple candidates so the location field can show autocomplete suggestions.
+// See https://open-meteo.com/en/docs/geocoding-api
 
 private let searchURL = "https://geocoding-api.open-meteo.com/v1/search"
 
@@ -39,14 +38,14 @@ func searchLocations(_ query: String) async throws -> [ForecastLocation] {
         URLQueryItem(name: "format", value: "json"),
     ]
 
-    // Begrens het verzoek zodat een hangende mobiele verbinding de zoek-Task niet
-    // eindeloos laat wachten (zelfde bescherming als OpenMeteoClient).
+    // Bound the request so a stalled mobile connection can't leave the search Task
+    // waiting forever (same protection as OpenMeteoClient).
     var request = URLRequest(url: components.url!)
     request.timeoutInterval = 10
 
     let (data, response) = try await URLSession.shared.data(for: request)
     if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
-        AppLog.network.error("Geocoding gaf HTTP \(http.statusCode, privacy: .public)")
+        AppLog.network.error("Geocoding returned HTTP \(http.statusCode, privacy: .public)")
         throw GeocodingError.httpStatus(http.statusCode)
     }
 
@@ -54,7 +53,7 @@ func searchLocations(_ query: String) async throws -> [ForecastLocation] {
     do {
         decoded = try JSONDecoder().decode(GeocodingResponse.self, from: data)
     } catch {
-        AppLog.network.error("Geocoding decode mislukt: \(error.localizedDescription, privacy: .public)")
+        AppLog.network.error("Geocoding decode failed: \(error.localizedDescription, privacy: .public)")
         throw GeocodingError.unexpectedStructure
     }
     guard let results = decoded.results else { return [] }
@@ -62,9 +61,8 @@ func searchLocations(_ query: String) async throws -> [ForecastLocation] {
     return results.map { result in
         ForecastLocation(
             id: "geo-\(result.id)",
-            // Alleen de plaatsnaam — de header toont die letterlijk. Het land
-            // blijft apart zodat de zoeklijst "Plaats, Land" kan tonen zonder
-            // provincie-ruis.
+            // Place name only — the header shows it verbatim. Country stays separate so
+            // the search list can render "City, Country" without province noise.
             name: result.name,
             country: result.country,
             latitude: roundCoordinate(result.latitude),

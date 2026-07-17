@@ -1,16 +1,15 @@
 import SwiftUI
 import UIKit
 
-// Instellingen (src/components/SettingsPanel.tsx), zonder het diagnostiek-blok.
-// Lagen aan/uit, schemering-drempel en de vijf grafiekkleuren met native
-// ColorPicker + intensiteit-slider.
+/// Settings: layer toggles, the twilight threshold and the five chart colors
+/// with a native ColorPicker and intensity slider.
 struct SettingsSheet: View {
     @Bindable var model: AppModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
-    // Versie + build uit de app-bundle (MARKETING_VERSION / CURRENT_PROJECT_VERSION),
-    // zodat gebruikers bij een issue kunnen doorgeven op welke versie ze zitten.
+    /// Version and build from the app bundle, so users can report which version
+    /// they're on when filing an issue.
     private static var versionString: String {
         let info = Bundle.main.infoDictionary
         let version = info?["CFBundleShortVersionString"] as? String ?? "?"
@@ -65,8 +64,8 @@ struct SettingsSheet: View {
         }
     }
 
-    // Temperatuureenheid: "Systeem" leidt de eenheid af uit de regio (VS → °F,
-    // elders → °C); °C/°F forceren de keuze. Zie MeasurementFormatting.
+    /// Temperature unit: "System" derives the unit from the region (US → °F,
+    /// elsewhere → °C); °C/°F force the choice. See MeasurementFormatting.
     private var temperatureSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("settings.temperature").font(.system(size: 15, weight: .semibold))
@@ -86,8 +85,8 @@ struct SettingsSheet: View {
         }
     }
 
-    // Tijdnotatie: "Systeem" volgt de 12/24-uurs-instelling van het apparaat;
-    // 12u/24u forceren de keuze. Canonieke tijden blijven isoTime (TimeFormatting).
+    /// Time format: "System" follows the device 12/24-hour setting; 12h/24h force
+    /// the choice. Canonical times stay isoTime (TimeFormatting).
     private var timeSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("settings.timeFormat").font(.system(size: 15, weight: .semibold))
@@ -107,8 +106,8 @@ struct SettingsSheet: View {
         }
     }
 
-    // Datumnotatie: "Systeem" volgt de locale-volgorde met weekdag; de andere
-    // kiezen tussen wel/geen weekdag (voorbeeld erbij zodat het meteen duidelijk is).
+    /// Date format: "System" follows the locale order including the weekday; the
+    /// others choose whether to include the weekday, with an example for clarity.
     private var dateSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("settings.dateFormat").font(.system(size: 15, weight: .semibold))
@@ -128,8 +127,8 @@ struct SettingsSheet: View {
         }
     }
 
-    // Taalkeuze verloopt via het iOS per-app-taalscherm (Instellingen → App).
-    // We openen dat scherm zoals de locatie-herstelknop in LocationSelectorMenu.
+    /// Language selection goes through the iOS per-app language screen
+    /// (Settings → App), which we open directly.
     private var languageSection: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("settings.language").font(.system(size: 15, weight: .semibold))
@@ -277,7 +276,7 @@ private struct ColorRow: View {
         .background(Tokens.control, in: RoundedRectangle(cornerRadius: 14))
     }
 
-    // Kleurvlak wijzigt r/g/b maar behoudt de alpha (zoals de PWA).
+    /// The swatch changes r/g/b but preserves the alpha.
     private var swatchBinding: Binding<Color> {
         Binding(
             get: { Color(RGBAColor(r: color.r, g: color.g, b: color.b, a: 1)) },

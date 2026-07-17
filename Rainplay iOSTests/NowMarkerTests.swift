@@ -2,17 +2,16 @@ import Foundation
 @testable import Rainplay_iOS
 import Testing
 
-// Port van src/lib/nowMarker.test.ts uit de PWA.
 struct NowMarkerTests {
-    // Deterministische klok in lokale tijd — dezelfde tijdzone waarin IsoTime de
-    // isoTime-strings parseert.
+    /// Deterministic clock in local time — the same time zone IsoTime uses to
+    /// parse isoTime strings.
     private func at(_ hour: Int, _ minute: Int = 0, dayOffset: Int = 0) -> Date {
         Calendar.current.date(from: DateComponents(
             year: 2026, month: 6, day: 11 + dayOffset, hour: hour, minute: minute
         ))!
     }
 
-    // Bouwt isoTime-strings uit "HH:mm", met dagophoging bij een middernacht-sprong.
+    /// Builds isoTime strings from "HH:mm", advancing the day on a midnight wrap.
     private func pts(_ times: String...) -> [String] {
         var dayOffset = 0
         var prevMinutes = Int.min

@@ -1,13 +1,12 @@
 import Charts
 import SwiftUI
 
-// De gecombineerde weer-grafiek (src/components/DayChartRecharts.tsx), gebouwd
-// met native Swift Charts: regen-bars, temperatuurlijn met tweede as,
-// lucht-gradient als plot-achtergrond, score-badges + weericonen boven de plot,
-// gestippelde nu-lijn en verticale tijdlabels.
-//
-// De view stuurt alleen de rendering aan; de dubbele-as-wiskunde zit in
-// ChartGeometry (Logic), en de losse lagen zijn aparte subviews hieronder.
+/// Combined weather chart built with Swift Charts: rain bars, a temperature line
+/// on a secondary axis, a sky gradient plot background, score badges and weather
+/// icons above the plot, a dashed now-line and vertical time labels.
+///
+/// The view only drives rendering; the dual-axis math lives in ChartGeometry
+/// (Logic), and the individual layers are the separate subviews below.
 struct DayChart: View {
     let hours: [HourlyWeather]
     let horizon: HorizonOption
@@ -18,8 +17,8 @@ struct DayChart: View {
     let twilightRadiation: Double
     var temperatureUnit: TemperatureUnit = .system
     var timeFormat: TimeFormat = .system
-    // Gedeeld over alle 4 de dag-panelen (zelfde temp-as), zodat ze vergelijkbaar
-    // zijn bij het swipen. Bevat ook maxMM voor de regen-as.
+    /// Shared across all four day panels (same temperature axis) so they're
+    /// comparable while swiping. Also carries the rain-axis maximum.
     let geometry: ChartGeometry
     var now: Date = Date()
     var isToday: Bool = false
@@ -27,15 +26,16 @@ struct DayChart: View {
 
     private var rainMax: Double { geometry.rainMax }
 
-    // De grafiek-as gebruikt `hour.time` als categorie-identiteit (uniek per
-    // punt), maar toont een geformatteerde tijd/weekdag. Deze map koppelt de
-    // identiteit aan de weergavestring, op basis van de gekozen tijdnotatie.
+    /// The axis uses `hour.time` as category identity (unique per point) but
+    /// displays a formatted time/weekday. This maps each identity to its display
+    /// string using the chosen time format.
     private var tickLabels: [String: String] {
         Dictionary(hours.map { ($0.time, tickLabel(for: $0)) }, uniquingKeysWith: { first, _ in first })
     }
 
-    // Uur-punten ("HH:mm") → compacte tijd zónder AM/PM (smalle, geroteerde
-    // as); week-punten (dagsleutel zonder ":") → locale-aware weekdag-afkorting.
+    /// Hour points ("HH:mm") map to a compact time without AM/PM (the axis is
+    /// narrow and rotated); week points (day key without ":") map to a
+    /// locale-aware weekday abbreviation.
     private func tickLabel(for hour: HourlyWeather) -> String {
         if hour.time.contains(":") {
             return axisTimeString(isoTime: hour.isoTime, format: timeFormat)
@@ -44,7 +44,7 @@ struct DayChart: View {
     }
 
     private let plotHeight: CGFloat = 232
-    private let topRowsHeight: CGFloat = 64   // ruimte boven de plot voor score + iconen
+    private let topRowsHeight: CGFloat = 64 // space above the plot for scores + icons
 
     var body: some View {
         let geo = geometry
@@ -59,8 +59,8 @@ struct DayChart: View {
         .chartYAxis(showRain || showTemp ? .automatic : .hidden)
         .chartBackground { proxy in
             plotRect(proxy) { rect in
-                // Vaste witte basis zodat de semi-transparante lucht-gradient in
-                // licht én donker over hetzelfde wit composeert (zie chartPlotBase).
+                // Fixed white base so the semi-transparent sky gradient composites
+                // over the same white in light and dark. See chartPlotBase.
                 Rectangle()
                     .fill(Tokens.chartPlotBase)
                     .frame(width: rect.width, height: rect.height)
@@ -95,11 +95,11 @@ struct DayChart: View {
 
     // MARK: - Marks
 
+    /// A single blue bar with a rounded top. A white halo bar was dropped: it
+    /// rounded on all sides and poked out as a white nub, and starting it below
+    /// the zero line to clip that drew the bar under the axis instead.
     @ChartContentBuilder
     private var rainBars: some ChartContent {
-        // Eén blauwe bar met afgeronde top. (Geen witte halo-bar meer: die werd
-        // rondom afgerond en piepte onderaan uit als witte nub; het onder de
-        // nullijn beginnen om dat weg te kappen tekende de bar juist ónder de as.)
         ForEach(Array(hours.enumerated()), id: \.offset) { _, hour in
             if hour.precipitationMm > 0 {
                 BarMark(
@@ -167,9 +167,9 @@ struct DayChart: View {
                         .font(.system(size: 11))
                         .foregroundStyle(Tokens.axisLabel)
                         .lineLimit(1)
-                        // Uniforme breedte vóór de -90°-rotatie + trailing-uitlijning:
-                        // daardoor lijnen de bovenkanten van álle labels uit, ook bij
-                        // 12-uurs labels van wisselende lengte ("2:00" vs "12:00").
+                        // Uniform width with trailing alignment before the -90°
+                        // rotation aligns the tops of all labels, even 12-hour
+                        // labels of varying length ("2:00" vs "12:00").
                         .frame(width: 40, alignment: .trailing)
                         .rotationEffect(.degrees(-90))
                         .frame(width: 16, height: 40)
@@ -178,8 +178,8 @@ struct DayChart: View {
         }
     }
 
-    // Reikt de gemeten plot-rechthoek aan de content door (gedeeld door de
-    // background- en overlay-lagen), zodat de uitlijning op één plek zit.
+    /// Passes the measured plot rectangle to its content (shared by the
+    /// background and overlay layers) so alignment lives in one place.
     @ViewBuilder
     private func plotRect<Content: View>(_ proxy: ChartProxy, @ViewBuilder content: @escaping (CGRect) -> Content) -> some View {
         GeometryReader { geo in
@@ -190,9 +190,9 @@ struct DayChart: View {
     }
 }
 
-// MARK: - Lagen (elk één verantwoordelijkheid)
+// MARK: - Layers (one responsibility each)
 
-// Lucht/helderheid-verloop als plot-achtergrond.
+/// Sky/brightness gradient used as the plot background.
 private struct SkyGradientBackground: View {
     let hours: [HourlyWeather]
     let colors: CellColors
@@ -209,7 +209,7 @@ private struct SkyGradientBackground: View {
     }
 }
 
-// Score-badges + weericonen boven de plot, uitgelijnd op de banden via de proxy.
+/// Score badges and weather icons above the plot, aligned to the bands via the proxy.
 private struct ChartScoreIconRows: View {
     let hours: [HourlyWeather]
     let showIcons: Bool
@@ -222,13 +222,13 @@ private struct ChartScoreIconRows: View {
         ForEach(Array(hours.enumerated()), id: \.offset) { _, hour in
             if let xInPlot = proxy.position(forX: hour.time) {
                 let x = rect.minX + xInPlot
-                // Score-badge + icoon vormen samen één rij, verticaal gecentreerd in de
-                // ruimte tussen de bovenrand van de sheet en de top van de grafiek.
+                // Score badge and icon form one row, centered in the space between
+                // the top of the sheet and the top of the chart.
                 scoreBadge(hour)
                     .position(x: x, y: rect.minY - topRowsHeight + 16)
                 if showIcons {
                     WeatherIcon(kind: hour.kind, size: 20)
-                        // Iets lager: meer lucht tussen score en icoon, minder eronder.
+                        // Slightly lower: more space between score and icon, less below.
                         .position(x: x, y: rect.minY - topRowsHeight + 44)
                         .accessibilityLabel(Text("a11y.timeWeather \(spokenTime(hour)) \(hour.kind.localizedText)"))
                 }
@@ -236,8 +236,8 @@ private struct ChartScoreIconRows: View {
         }
     }
 
-    // Leesbaar tijdstip voor VoiceOver: uur-punten in de gekozen notatie,
-    // week-punten als weekdag.
+    /// Readable time for VoiceOver: hour points in the chosen format, week points
+    /// as a weekday.
     private func spokenTime(_ hour: HourlyWeather) -> String {
         if hour.time.contains(":") {
             return timeString(isoTime: hour.isoTime, format: timeFormat)
@@ -245,7 +245,7 @@ private struct ChartScoreIconRows: View {
         return weekdayLabel(date: IsoTime.date(hour.isoTime))
     }
 
-    // Eén VoiceOver-element met leesbaar label ("Score 8 om 14:00").
+    /// A single VoiceOver element with a readable label ("Score 8 at 14:00").
     private func scoreBadge(_ hour: HourlyWeather) -> some View {
         ZStack {
             Circle().fill(scoreColor(hour.score)).frame(width: 22, height: 22)
@@ -258,7 +258,7 @@ private struct ChartScoreIconRows: View {
     }
 }
 
-// Rood gestippelde "nu"-lijn met temperatuur-label.
+/// Red dashed now-line with a temperature label.
 private struct ChartNowLine: View {
     let x: CGFloat
     let rect: CGRect

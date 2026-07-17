@@ -1,17 +1,12 @@
 import Foundation
 
-// Kern-datamodellen, 1:1 geport uit de Rainplay PWA (src/types.ts,
-// src/api/openMeteo.ts en src/components/cellColors.ts).
-
+/// Core presentation-free data models. Display names and formatting live at the
+/// presentation boundary (Views/Formatting).
 enum WeatherKind: String, Codable {
     case rain
     case cloud
     case partly
     case sun
-
-    // Weergavenamen (VoiceOver-labels e.d.) leven op de presentatiegrens in
-    // Views/Formatting/LocalizedLabels.swift (WeatherKind.titleKey), zodat dit
-    // model presentatievrij blijft.
 }
 
 enum DayOption: String, CaseIterable, Identifiable {
@@ -20,11 +15,9 @@ enum DayOption: String, CaseIterable, Identifiable {
     case overmorgen = "Overmorgen"
     case week = "Week"
 
+    /// `rawValue` is the stable identity and storage key; the localized display
+    /// title lives at the presentation boundary (`DayOption.titleKey`).
     var id: String { rawValue }
-
-    // De weergavetitel (incl. de "Overm."-afkorting) leeft gelokaliseerd op de
-    // presentatiegrens: DayOption.titleKey in LocalizedLabels.swift. rawValue
-    // blijft de stabiele identiteit/opslagsleutel en verandert daarom niet.
 }
 
 enum HorizonOption: String, CaseIterable, Identifiable {
@@ -35,9 +28,8 @@ enum HorizonOption: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-// Voorkeur voor de temperatuureenheid in de UI. Canonieke data blijft altijd
-// Celsius; deze keuze werkt alleen op de presentatiegrens (zie
-// MeasurementFormatting). `.system` leidt de eenheid af uit de locale.
+/// Preferred temperature unit for the UI. Canonical data stays in Celsius; this
+/// applies only at the presentation boundary. `.system` derives the unit from the locale.
 enum TemperatureUnit: String, Codable, CaseIterable, Identifiable {
     case system
     case celsius
@@ -46,9 +38,9 @@ enum TemperatureUnit: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-// Voorkeur voor de tijdnotatie in de UI. Canonieke tijden blijven altijd de
-// lokale ISO-tijd (isoTime); deze keuze werkt alleen op de presentatiegrens
-// (zie TimeFormatting). `.system` volgt de 12/24-uurs-instelling van het apparaat.
+/// Preferred time notation for the UI. Canonical times stay as local ISO time
+/// (`isoTime`); this applies only at the presentation boundary. `.system` follows
+/// the device's 12/24-hour setting.
 enum TimeFormat: String, Codable, CaseIterable, Identifiable {
     case system
     case twelveHour
@@ -57,8 +49,8 @@ enum TimeFormat: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-// Voorkeur voor de datumnotatie in de UI. `.system` volgt de locale-volgorde;
-// de expliciete stijlen kiezen tussen wel/geen weekdag. Zie TimeFormatting.
+/// Preferred date notation for the UI. `.system` follows the locale ordering; the
+/// explicit styles choose whether to include the weekday.
 enum DateStyle: String, Codable, CaseIterable, Identifiable {
     case system
     case dayMonth
@@ -68,34 +60,30 @@ enum DateStyle: String, Codable, CaseIterable, Identifiable {
 }
 
 struct HourlyWeather: Equatable {
-    // Lokale tijd van de locatie zoals Open-Meteo die levert ("2026-07-09T14:00").
-    // Bewust een string (net als de PWA) zodat datumfilters op stringprefix werken.
+    /// Location-local time as delivered by Open-Meteo ("2026-07-09T14:00").
+    /// Kept as a string so date filters can match on the string prefix.
     var isoTime: String
-    // Canonieke 24-uurs identiteitsstring ("14:00"), of een dagsleutel
-    // ("2026-07-09") in de week-weergave. Dient als stabiele grafiek-as-categorie
-    // en dag/uur-groepering — NIET om aan de gebruiker te tonen. Voor weergave
-    // formatteren views op basis van isoTime via TimeFormatting.
+    /// Canonical 24-hour identity string ("14:00"), or a day key ("2026-07-09")
+    /// in the week view. Serves as the stable chart axis category and day/hour
+    /// grouping key — not for display. Views format from `isoTime` instead.
     var time: String
     var temperatureC: Double
     var score: Int
     var precipitationMm: Double
-    // Defaults op de properties zelf, zodat de gesynthetiseerde memberwise-init
-    // deze velden optioneel maakt zonder een handgeschreven initializer.
     var precipitationProbability: Double = 0
     var cloudCover: Double = 0
     var radiation: Double = 0
     var isDay: Bool = true
     var kind: WeatherKind = .cloud
-    // Unix-timestamp (ms) van zonsondergang op dezelfde kalenderdag, voor de
-    // civiele-schemering-falloff in de lucht-gradient. Optioneel zodat
-    // testfixtures compact blijven.
+    /// Unix timestamp (ms) of sunset on the same calendar day, for the civil
+    /// twilight falloff in the sky gradient. Optional to keep test fixtures compact.
     var sunsetMs: Double? = nil
 }
 
 typealias ForecastPoint = HourlyWeather
 
 enum LocationSource: String, Codable {
-    // Raw value blijft "default" zodat reeds opgeslagen locaties blijven decoderen.
+    /// Raw value stays "default" so already-stored locations keep decoding.
     case fallback = "default"
     case gps
     case manual
@@ -104,14 +92,14 @@ enum LocationSource: String, Codable {
 struct ForecastLocation: Codable, Equatable {
     var id: String?
     var name: String
-    // Alleen gebruikt om zoekresultaten te onderscheiden — nooit in de header.
+    /// Only used to disambiguate search results — never shown in the header.
     var country: String?
     var latitude: Double
     var longitude: Double
     var source: LocationSource
     var updatedAt: Double?
 
-    // Stabiele sleutel voor lijsten en gelijkheid, zoals locationKey() in de PWA.
+    /// Stable key for lists and equality.
     var key: String { id ?? "\(name)-\(latitude)-\(longitude)" }
 
     static func isSame(_ a: ForecastLocation, _ b: ForecastLocation) -> Bool {
@@ -132,12 +120,12 @@ struct Forecast: Equatable {
     var currentTemperature: Int
     var hourly: [HourlyWeather]
     var minutely15: [ForecastPoint]
-    // datum ("yyyy-MM-dd") → tijd ("HH:mm")
+    /// Date ("yyyy-MM-dd") → time ("HH:mm").
     var sunriseTimes: [String: String]
     var sunsetTimes: [String: String]
 }
 
-// MARK: - Grafiekkleuren
+// MARK: - Chart colors
 
 struct RGBAColor: Codable, Equatable {
     var r: Int
@@ -145,7 +133,6 @@ struct RGBAColor: Codable, Equatable {
     var b: Int
     var a: Double
 
-    // Weergave zoals de PWA: "rgba(255, 196, 0, 0.33)".
     var css: String {
         "rgba(\(r), \(g), \(b), \(Self.formatAlpha(a)))"
     }
@@ -184,16 +171,14 @@ struct CellColors: Codable, Equatable {
     )
 }
 
-// MARK: - Lokale ISO-tijd
+// MARK: - Local ISO time
 
-// Open-Meteo levert met timezone=auto lokale tijden zonder zone-suffix.
-// Net als `new Date(isoTime)` in de PWA interpreteren we die in de
-// tijdzone van het apparaat.
+/// With `timezone=auto`, Open-Meteo delivers local times without a zone suffix.
+/// These are interpreted in the device's time zone.
 enum IsoTime {
-    // Handmatige parse van "yyyy-MM-dd'T'HH:mm" met Calendar.current (een
-    // waardetype, dus thread-safe). Bewust géén gedeelde DateFormatter: die is
-    // niet thread-safe (blokkeert veilig off-main draaien) en trager. nonisolated
-    // zodat de decode buiten de main actor kan lopen.
+    /// Manually parses "yyyy-MM-dd'T'HH:mm" using `Calendar.current` (a value type,
+    /// so thread-safe). Deliberately avoids a shared `DateFormatter`, which is not
+    /// thread-safe and slower. `nonisolated` so decoding can run off the main actor.
     nonisolated static func date(_ isoTime: String) -> Date {
         let halves = isoTime.split(separator: "T", maxSplits: 1)
         guard halves.count == 2 else { return .distantPast }
@@ -208,13 +193,12 @@ enum IsoTime {
         return Calendar.current.date(from: components) ?? .distantPast
     }
 
-    // Unix-timestamp in milliseconden, zodat geporte JS-berekeningen
-    // (getTime()-semantiek) letterlijk overgenomen kunnen worden.
+    /// Unix timestamp in milliseconds.
     nonisolated static func ms(_ isoTime: String) -> Double {
         date(isoTime).timeIntervalSince1970 * 1000
     }
 
-    // Terug naar "yyyy-MM-dd'T'HH:mm" (voor geïnterpoleerde tijdstippen).
+    /// Back to "yyyy-MM-dd'T'HH:mm" (for interpolated timestamps).
     nonisolated static func iso(from date: Date) -> String {
         let c = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date)
         return String(format: "%04d-%02d-%02dT%02d:%02d",

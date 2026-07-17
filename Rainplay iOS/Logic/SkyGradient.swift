@@ -1,8 +1,5 @@
 import Foundation
 
-// Lucht-gradient en kleurhelpers, 1:1 geport uit de PWA
-// (kleur- en gradient-gedeelte van src/lib/chart.ts).
-
 func lerpRgba(_ c1: RGBAColor, _ c2: RGBAColor, _ t: Double) -> RGBAColor {
     RGBAColor(
         r: Int((Double(c1.r) + (Double(c2.r) - Double(c1.r)) * t).rounded()),
@@ -16,24 +13,21 @@ func mixRgba(_ c1: RGBAColor, _ c2: RGBAColor) -> RGBAColor {
     lerpRgba(c1, c2, 0.5)
 }
 
-// Straling (W/m²) waarboven de lucht als "volle dag" geldt. 20 W/m² ligt net
-// boven civiele schemering (~5 W/m²), zodat alleen de korte minuten rond de
-// feitelijke zonsopkomst/-ondergang geblend worden — bewolkte daguren
-// (typisch 50–300 W/m²) houden hun strakke dag-kleur.
+/// Radiation (W/m²) above which the sky counts as full daylight. Just above civil
+/// twilight (~5 W/m²), so only the minutes around actual sunrise/sunset are
+/// blended while overcast daytime hours (typically 50–300 W/m²) keep their solid
+/// day colour.
 let defaultTwilightRadiationWm2 = 20.0
 
-// Shortwave_radiation zakt naar 0 bij zonsondergang, maar de lucht blijft nog
-// ~75 minuten zichtbaar licht (civiele + nautische schemering). Deze falloff
-// overbrugt dat gat met de vooraf berekende sunsetMs, zodat de gradient
-// geleidelijk vervaagt in plaats van abrupt naar nacht te knippen.
+/// Shortwave radiation drops to 0 at sunset, but the sky stays visibly lit for
+/// ~75 minutes (civil + nautical twilight). This bridges that gap so the gradient
+/// fades gradually instead of snapping to night.
 private let civilTwilightMs = 75.0 * 60 * 1000
 
-// Zet straling om naar een [0, 1] lucht-helderheid waarmee tussen nacht- en
-// dagkleuren geblend wordt. Straling in plaats van de binaire is_day-vlag geeft
-// een vloeiende, tijd-consistente zonsondergang: dezelfde stralingswaarde geeft
-// dezelfde kleur, welk horizonvenster ook getoond wordt. Alleen de smalle
-// schemeringszone (0–20 W/m²) wordt geblend; al het echte daglicht bereikt
-// direct helderheid 1.
+/// Maps radiation to a [0, 1] sky brightness used to blend night and day colours.
+/// Using radiation rather than the binary is-day flag yields a smooth,
+/// time-consistent sunset: the same radiation value produces the same colour
+/// regardless of which horizon window is shown.
 func skyBrightness(_ hour: HourlyWeather, twilightWm2: Double = defaultTwilightRadiationWm2) -> Double {
     let radiationBrightness = min(hour.radiation / twilightWm2, 1)
     guard let sunsetMs = hour.sunsetMs else { return radiationBrightness }
@@ -59,21 +53,13 @@ struct SkyGradientStop: Equatable {
     var color: RGBAColor
 }
 
-/// Bouwt de kleurstops voor de lucht/helderheid-gradient als één horizontale
-/// lineaire gradient (offsets 0..1), in één keer te schilderen.
+/// Builds the colour stops for the sky/brightness gradient as one horizontal
+/// linear gradient (offsets 0...1).
 ///
-/// Visueel model (spiegelt de per-cel-rect-gradient van vroeger, maar naadloos):
-/// - Elk uur i beslaat de band [i/n, (i+1)/n]; zijn CENTRUM (offset (i+0.5)/n)
-///   krijgt de kleur van dat uur = cellFill(hours[i]).
-/// - Op de GRENS tussen uur i en i+1 (offset (i+1)/n) staat de 50/50-blend van
-///   de twee aangrenzende celkleuren — dezelfde rand-mix als voorheen.
-/// - De allereerste rand (offset 0) = kleur van het eerste uur; de laatste rand
-///   (offset 1) = kleur van het laatste uur.
-///
-/// Optimalisatie: opeenvolgende stops met identieke kleur worden samengevouwen
-/// tot de minimale set (de eerste en laatste van elke identieke-kleur-reeks),
-/// zodat een vlakke reeks gelijke cellen (bijv. nachturen) als vlakke vulling
-/// rendert in plaats van vele overbodige interpolatiepunten.
+/// Each hour `i` spans the band `[i/n, (i+1)/n]`; its centre takes that hour's
+/// `cellFill`, and every interior boundary takes the 50/50 blend of its two
+/// neighbours. Runs of identical adjacent colours are collapsed to their first
+/// and last stop, so flat stretches (e.g. night hours) render as a solid fill.
 func buildSkyGradientStops(
     _ hours: [HourlyWeather],
     colors: CellColors,
@@ -84,27 +70,20 @@ func buildSkyGradientStops(
 
     let fills = hours.map { cellFill($0, colors: colors, twilightWm2: twilightWm2) }
 
-    // Volledige centrum+grens-stoplijst, van links naar rechts.
     var raw: [SkyGradientStop] = []
-    raw.append(SkyGradientStop(offset: 0, color: fills[0])) // eerste rand
+    raw.append(SkyGradientStop(offset: 0, color: fills[0]))
     for i in 0..<n {
-        raw.append(SkyGradientStop(offset: (Double(i) + 0.5) / Double(n), color: fills[i])) // band-centrum
+        raw.append(SkyGradientStop(offset: (Double(i) + 0.5) / Double(n), color: fills[i]))
         if i < n - 1 {
-            raw.append(SkyGradientStop(offset: Double(i + 1) / Double(n), color: mixRgba(fills[i], fills[i + 1]))) // grens-blend
+            raw.append(SkyGradientStop(offset: Double(i + 1) / Double(n), color: mixRgba(fills[i], fills[i + 1])))
         }
     }
-    raw.append(SkyGradientStop(offset: 1, color: fills[n - 1])) // laatste rand
+    raw.append(SkyGradientStop(offset: 1, color: fills[n - 1]))
 
-    // Vouw reeksen met identieke kleur samen: houd alleen de eerste en laatste
-    // van elke reeks.
     var collapsed: [SkyGradientStop] = []
     for i in raw.indices {
-        let isFirst = i == 0
-        let isLast = i == raw.count - 1
-        let samePrev = !isFirst && raw[i - 1].color == raw[i].color
-        let sameNext = !isLast && raw[i + 1].color == raw[i].color
-        // Laat een stop alleen vallen als hij binnenin een identieke-kleur-reeks ligt.
-        if samePrev && sameNext { continue }
+        let isInterior = i > 0 && i < raw.count - 1
+        if isInterior, raw[i - 1].color == raw[i].color, raw[i + 1].color == raw[i].color { continue }
         collapsed.append(raw[i])
     }
 

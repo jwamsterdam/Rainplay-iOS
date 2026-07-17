@@ -2,8 +2,7 @@ import CoreLocation
 import Foundation
 import os
 
-// GPS + plaatsnaam, vervangt useCurrentLocation.ts + googleMaps.ts uit de PWA.
-// CLGeocoder doet de reverse geocoding — geen Google Maps API-key meer nodig.
+// GPS plus place name. CLGeocoder handles reverse geocoding, so no API key is needed.
 
 enum LocationStatus {
     case idle
@@ -27,8 +26,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationProvid
     override init() {
         super.init()
         manager.delegate = self
-        // Plaatsnauwkeurigheid volstaat voor een weerbericht (de PWA gebruikte
-        // ook enableHighAccuracy: false) en spaart batterij.
+        // City-level accuracy is enough for a weather report and saves battery.
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
     }
 
@@ -37,9 +35,9 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationProvid
         var denied: Bool
     }
 
-    /// Vraagt de huidige GPS-locatie op, inclusief plaatsnaam via reverse
-    /// geocoding. Gooit bij weigering of falen; de status/foutmelding-props
-    /// zijn dan al gezet met dezelfde Nederlandse teksten als de PWA.
+    /// Resolves the current GPS location, including a place name via reverse geocoding.
+    /// Throws on denial or failure; the status and error-message properties are already
+    /// set by then.
     func currentLocation() async throws -> ForecastLocation {
         status = .locating
         errorMessage = nil
@@ -74,12 +72,12 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationProvid
         } catch let failure as LocationFailure {
             status = failure.denied ? .denied : .error
             errorMessage = failure.message
-            AppLog.location.notice("Locatie geweigerd/gefaald: \(failure.message, privacy: .public)")
+            AppLog.location.notice("Location denied/failed: \(failure.message, privacy: .public)")
             throw failure
         } catch {
             status = .error
             errorMessage = "Locatie ophalen lukte niet."
-            AppLog.location.error("Locatie ophalen mislukt: \(error.localizedDescription, privacy: .public)")
+            AppLog.location.error("Location fetch failed: \(error.localizedDescription, privacy: .public)")
             throw error
         }
     }

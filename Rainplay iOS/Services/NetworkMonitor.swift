@@ -1,14 +1,13 @@
 import Foundation
 import Network
 
-// Offline-detectie via NWPathMonitor, vervangt useNetworkStatus.ts uit de PWA.
+// Offline detection via NWPathMonitor.
 
 @Observable
 final class NetworkMonitor {
     private(set) var isOffline = false
 
-    // Meldt herstel van de verbinding, zodat de app dan opnieuw kan laden
-    // (zoals refetchOnReconnect in de PWA).
+    /// Signals that the connection was restored so the app can reload.
     var onReconnect: (() -> Void)?
 
     private let monitor = NWPathMonitor()

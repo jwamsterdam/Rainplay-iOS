@@ -1,23 +1,21 @@
 import SwiftUI
 import UIKit
 
-// Ontwerp-tokens geport uit de PWA (src/design/tokens.css). Kleuren, radii en
-// spacing die door de views gedeeld worden. SF Pro (het systeemfont) vervangt
-// Inter — dat is de native, meegeleverde variant.
+// Design tokens shared across the views: colors, radii and spacing.
 //
-// Kleuren zijn dynamisch: ze lossen per interface-stijl (licht/donker) op, zodat
-// de views automatisch meebewegen met de systeem-instelling. De luchtfoto in de
-// hero blijft in beide modi gelijk; alleen de overlay/tekst/oppervlakken wisselen.
+// Colors are dynamic: they resolve per interface style (light/dark) so the views
+// follow the system setting automatically. The hero sky photo is identical in
+// both modes; only the overlay, text and surfaces change.
 
 extension Color {
-    // Dynamische kleur die licht/donker oplost via de trait-collectie.
+    /// Dynamic color that resolves light/dark via the trait collection.
     init(light: Color, dark: Color) {
         self.init(UIColor { traits in
             UIColor(traits.userInterfaceStyle == .dark ? dark : light)
         })
     }
 
-    // Zelfde, maar direct vanuit twee hex-strings voor beknopte token-definities.
+    /// Same, but from two hex strings for concise token definitions.
     init(lightHex: String, darkHex: String) {
         self.init(light: Color(hex: lightHex), dark: Color(hex: darkHex))
     }
@@ -50,14 +48,14 @@ extension Color {
 }
 
 enum Tokens {
-    // Tekstkleuren (donker op licht ↔ licht op donker).
+    // Text colors (dark on light, light on dark).
     static let ink = Color(lightHex: "#101828", darkHex: "#E6EAF1")
     static let inkStrong = Color(lightHex: "#091526", darkHex: "#F4F7FB")
     static let inkMuted = Color(lightHex: "#697586", darkHex: "#9AA4B2")
     static let inkSoft = Color(lightHex: "#8a95a4", darkHex: "#7C8695")
 
-    // Hero-tekstkleuren. Licht: donkerblauw over de heldere luchtfoto. Donker:
-    // wit over het donkere scrim dat diezelfde foto dimt (zie WeatherScreen).
+    /// Hero text colors. Light: dark blue over the bright sky photo. Dark: white
+    /// over the dark scrim that dims that same photo (see WeatherScreen).
     static let heroDayLabel = Color(
         light: Color(red: 15 / 255, green: 30 / 255, blue: 52 / 255, opacity: 0.76),
         dark: Color(white: 1, opacity: 0.88)
@@ -71,12 +69,12 @@ enum Tokens {
         dark: Color(white: 1, opacity: 0.78)
     )
 
-    // Oppervlakken. surface = de grote "decision sheet" + panelen; control = de
-    // lichte besturingsvlakken (segmented-track, knoppen, kaartjes).
+    // Surfaces. surface = the large decision sheet and panels; control = the
+    // light control surfaces (segmented track, buttons, cards).
     static let surface = Color(lightHex: "#ffffff", darkHex: "#1B1E25")
     static let control = Color(lightHex: "#f3f6f9", darkHex: "#23262E")
-    // De actieve thumb in de segmented control: net lichter dan de track zodat
-    // hij in beide modi "opduikt" (in donker mag surface niet dezelfde tint zijn).
+    /// Active thumb in the segmented control: slightly lighter than the track so
+    /// it stands out in both modes (in dark it must differ from surface).
     static let segmentThumb = Color(lightHex: "#ffffff", darkHex: "#363B45")
     static let accent = Color(lightHex: "#1d7eea", darkHex: "#4A9BF5")
     static let rain = Color(hex: "#78b4f8")
@@ -87,34 +85,33 @@ enum Tokens {
         dark: Color(white: 1, opacity: 0.14)
     )
 
-    // Inactieve segment-tekst en de subtiele rand rond de segmented-track.
+    // Inactive segment text and the subtle border around the segmented track.
     static let segmentInactive = Color(lightHex: "#4b5565", darkHex: "#AEB6C2")
     static let segmentTrackStroke = Color(
         light: Color(red: 226 / 255, green: 232 / 255, blue: 240 / 255, opacity: 0.74),
         dark: Color(white: 1, opacity: 0.10)
     )
 
-    // Score-kleuren (chartHelpers.ts) — semantisch, gelijk in beide modi.
+    // Score colors — semantic, identical in both modes.
     static let scoreGood = Color(hex: "#93bf00")
     static let scoreOk = Color(hex: "#f58a1f")
     static let scoreLow = Color(hex: "#f3b329")
     static let scoreBad = Color(hex: "#e15d4f")
 
-    // Grafiek-lijnkleuren. `grid` ligt binnen de plot (over de vaste witte basis
-    // van de grafiek) en blijft daarom in beide modi gelijk; alleen de aslabels
-    // eromheen — op de sheet — worden adaptief zodat ze op donker leesbaar zijn.
+    // Chart line colors. `grid` sits inside the plot (over the fixed white chart
+    // base) and stays identical in both modes; only the axis labels around it, on
+    // the sheet, are adaptive so they stay legible on dark.
     static let grid = Color(hex: "#dce3ea")
     static let axisLabel = Color(lightHex: "#697586", darkHex: "#9AA4B2")
 
-    // Buitenrand van de grafiek-plot. In dark mag dit donkerder zodat het witte
-    // grafiekvlak een duidelijke rand krijgt tegen de donkere sheet; de interne
-    // gridlines blijven wél licht (`grid`), want die liggen over het witte vlak.
+    /// Outer border of the chart plot. Darker in dark mode so the white chart
+    /// area gets a clear edge against the dark sheet; the inner gridlines stay
+    /// light (`grid`) because they sit over the white area.
     static let chartBorder = Color(lightHex: "#dce3ea", darkHex: "#3A414C")
 
-    // Vaste lichte basis áchter de lucht-gradient in de grafiek. De celkleuren
-    // zijn semi-transparant en werden ontworpen om over wit te liggen; zonder
-    // deze basis zouden ze in dark mode over het donkere oppervlak vertroebelen
-    // en zou je de zon-/luchtkleuren niet meer zien.
+    /// Fixed light base behind the sky gradient in the chart. The cell colors are
+    /// semi-transparent and designed to sit over white; without this base they
+    /// would muddy over the dark surface in dark mode and hide the sun/sky colors.
     static let chartPlotBase = Color(hex: "#ffffff")
     static let tempAxisLabel = Color(hex: "#ff8a3d")
     static let nowMarker = Color(hex: "#ff3b30")
@@ -126,7 +123,7 @@ enum Tokens {
     static let radiusSheet: CGFloat = 28
 }
 
-// Score → badge-kleur (chartHelpers.ts scoreColor).
+/// Maps a score to its badge color.
 func scoreColor(_ score: Int) -> Color {
     if score >= 8 { return Tokens.scoreGood }
     if score >= 6 { return Tokens.scoreOk }

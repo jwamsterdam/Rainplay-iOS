@@ -1,18 +1,17 @@
 import Foundation
 
-// Afgeleide kop-informatie voor het hoofdscherm, één keer berekend uit de
-// forecast + selectie i.p.v. verspreid (en meermaals) in de view. Zo bestaat er
-// één bron van waarheid voor de temperatuur, het beste-moment-venster en de
-// adviesteksten, en draait bestOutdoorWindow niet 3× per render.
+/// Derived header info for the main screen, computed once from the forecast and
+/// selection instead of scattered (and repeated) across the view. Gives a single
+/// source of truth for temperature, best window and advice text, and keeps
+/// bestOutdoorWindow from running three times per render.
 struct DecisionSummary: Equatable {
     var temperature: Int?
-    // Canonieke kop-datum en beste-start; de view formatteert deze via
-    // TimeFormatting op basis van de gekozen tijd/datum-notatie. `bestStart` is
-    // nil wanneer er geen duidelijk buitenmoment is (view toont dan geen
-    // "Buiten vanaf …").
+    /// Header date and best start; the view formats these via TimeFormatting per
+    /// the chosen time/date notation. `bestStart` is nil when there is no clear
+    /// outdoor moment (the view then shows no "outside from …").
     var headerDate: HeaderDate
     var bestStart: Date?
-    // Presentatievrij token; de view mapt dit naar gelokaliseerde tekst.
+    /// Presentation-free token; the view maps it to localized text.
     var summary: OutdoorSummary
 }
 
@@ -25,9 +24,9 @@ func decisionSummary(
     let hours = visiblePoints(forecast: forecast, day: day, horizon: horizon, now: now)
     let window = bestOutdoorWindow(hours)
 
-    // "Vandaag" toont de live huidige temperatuur; andere dagen het daggemiddelde.
-    // nil = nog geen data (de view toont dan een placeholder i.p.v. een plausibel
-    // ogend maar verzonnen getal).
+    // Today shows the live current temperature; other days the daily average.
+    // nil means no data yet, so the view shows a placeholder rather than a
+    // plausible-looking but invented number.
     let temperature: Int?
     if day == .vandaag {
         temperature = forecast?.currentTemperature

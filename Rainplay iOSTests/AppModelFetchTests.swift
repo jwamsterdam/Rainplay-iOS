@@ -2,22 +2,21 @@ import Foundation
 @testable import Rainplay_iOS
 import Testing
 
-// Tests voor het fetch-beleid van AppModel: 5-min-versheid, meeliften op een
-// lopende load, annuleren-bij-locatiewissel (de generatie-guard), retry/back-off,
-// géén retry bij 4xx, en het GPS-pad in start(). Gebruikt nep-implementaties van
-// ForecastProviding/LocationProviding + een injecteerbare klok — geen echte
-// netwerk-/GPS-toegang.
+/// Exercises AppModel's fetch policy: 5-minute freshness, coalescing onto an
+/// in-flight load, cancel-on-location-change (the generation guard), retry/back-off,
+/// no retry on 4xx, and the GPS path in start(). Uses fake ForecastProviding and
+/// LocationProviding implementations plus an injectable clock — no real network or GPS.
 @MainActor
 struct AppModelFetchTests {
-    // Nep-forecastbron die een closure aanroept (telt calls, kan fouten gooien).
+    /// Fake forecast source that calls a closure (counts calls, can throw).
     @MainActor final class StubForecastProvider: ForecastProviding {
         let handler: (ForecastLocation) async throws -> Forecast
         init(_ handler: @escaping (ForecastLocation) async throws -> Forecast) { self.handler = handler }
         func fetchForecast(_ location: ForecastLocation) async throws -> Forecast { try await handler(location) }
     }
 
-    // Forecastbron waarvan calls kunnen blokkeren op een continuation of meteen
-    // teruggeven — nodig om de generatie-guard deterministisch te testen.
+    /// Forecast source whose calls can either block on a continuation or return
+    /// immediately — lets the generation guard be tested deterministically.
     @MainActor final class Gate: ForecastProviding {
         var calls: [ForecastLocation] = []
         var immediate: [Int: Forecast] = [:]
@@ -36,7 +35,7 @@ struct AppModelFetchTests {
         }
     }
 
-    // Nep-locatiebron die een vast resultaat teruggeeft (geen CoreLocation).
+    /// Fake location source returning a fixed result (no CoreLocation).
     final class StubLocationProvider: LocationProviding {
         private(set) var status: LocationStatus = .idle
         private(set) var errorMessage: String?
@@ -68,8 +67,8 @@ struct AppModelFetchTests {
         UserDefaults(suiteName: "rainplay.tests.\(UUID().uuidString)")!
     }
 
-    // Defaults met een reeds opgeslagen (niet-default) locatie, zodat start()
-    // meteen "resolved" is en één keer laadt — zonder GPS.
+    /// Defaults holding an already-saved (non-default) location, so start() is
+    /// immediately resolved and loads once — without GPS.
     private func seededDefaults(_ location: ForecastLocation) -> UserDefaults {
         let d = defaults()
         if let encoded = try? JSONEncoder().encode(location) {
@@ -89,7 +88,7 @@ struct AppModelFetchTests {
         }
     }
 
-    // MARK: - Laadbeleid
+    // MARK: - Load policy
 
     @Test func successStoresForecast() async {
         let log = CallLog()
@@ -112,8 +111,8 @@ struct AppModelFetchTests {
             log.locations.append(loc); return self.forecast(21)
         }, now: { clock.value })
 
-        await model.start()                  // laadt één keer, markeert resolved
-        await model.loadForecastIfStale()    // klok onveranderd → nog vers
+        await model.start()                  // loads once, marks resolved
+        await model.loadForecastIfStale()    // clock unchanged → still fresh
 
         #expect(log.count == 1)
     }
@@ -125,8 +124,8 @@ struct AppModelFetchTests {
             log.locations.append(loc); return self.forecast(21)
         }, now: { clock.value })
 
-        await model.start()                                    // laadt één keer (t0)
-        clock.value = clock.value.addingTimeInterval(6 * 60)   // +6 min → verouderd
+        await model.start()                                    // loads once (t0)
+        clock.value = clock.value.addingTimeInterval(6 * 60)   // +6 min → stale
         await model.loadForecastIfStale()
 
         #expect(log.count == 2)
@@ -141,7 +140,7 @@ struct AppModelFetchTests {
 
         await model.loadForecast()
 
-        #expect(log.count == 1)           // geen retry op 429
+        #expect(log.count == 1)           // no retry on 429
         #expect(model.loadFailed == true)
         #expect(model.forecast == nil)
     }
@@ -155,37 +154,37 @@ struct AppModelFetchTests {
 
         await model.loadForecast()
 
-        #expect(log.count == 3)           // 1 poging + 2 retries
+        #expect(log.count == 3)           // 1 attempt + 2 retries
         #expect(model.loadFailed == true)
     }
 
     @Test func locationChangeIgnoresLateResultFromCancelledLoad() async {
         let gate = Gate()
-        gate.immediate[1] = forecast(2)   // tweede call (locatie B) geeft meteen terug
+        gate.immediate[1] = forecast(2)   // second call (location B) returns immediately
         let model = AppModel(defaults: defaults(), forecastProvider: gate)
 
-        // Locatie A: eerste call blokkeert op de continuation.
+        // Location A: first call blocks on the continuation.
         model.selectedLocation = location("A", 1, 1)
         await waitUntil { gate.calls.count == 1 }
 
-        // Locatie B: annuleert de lopende A-load en start B (die meteen teruggeeft).
+        // Location B: cancels the in-flight A load and starts B (returns immediately).
         model.selectedLocation = location("B", 2, 2)
         await waitUntil { model.forecast?.currentTemperature == 2 }
         #expect(model.forecast?.currentTemperature == 2)
 
-        // A voltooit alsnog (laat) met andere data — mag B niet overschrijven.
+        // A completes late with different data — must not overwrite B.
         gate.finish(0, with: forecast(1))
         await waitUntil { gate.calls.count >= 2 }
         #expect(model.forecast?.currentTemperature == 2)
     }
 
-    // MARK: - start() met GPS
+    // MARK: - start() with GPS
 
     @Test func startWithDefaultLocationResolvesViaGPSAndLoadsOnce() async {
         let log = CallLog()
         let gps = location("Testplaats", 1, 2, source: .gps)
         let model = AppModel(
-            defaults: defaults(),                                  // geen opgeslagen locatie → source .default
+            defaults: defaults(),                                  // no saved location → source .default
             forecastProvider: StubForecastProvider { loc in log.locations.append(loc); return self.forecast(19) },
             locationProvider: StubLocationProvider(.success(gps))
         )
@@ -195,7 +194,7 @@ struct AppModelFetchTests {
 
         #expect(model.selectedLocation.source == .gps)
         #expect(model.selectedLocation.name == "Testplaats")
-        #expect(log.count == 1)                                    // precies één fetch, voor de GPS-coördinaten
+        #expect(log.count == 1)                                    // exactly one fetch, for the GPS coordinates
         #expect(log.locations.first?.latitude == 1)
     }
 
@@ -211,7 +210,7 @@ struct AppModelFetchTests {
         await model.start()
         await waitUntil { model.forecast != nil }
 
-        #expect(model.selectedLocation.source == .fallback)        // valt terug op Haarlem
+        #expect(model.selectedLocation.source == .fallback)        // falls back to Haarlem
         #expect(log.count == 1)
     }
 }

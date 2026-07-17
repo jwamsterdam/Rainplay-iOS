@@ -2,8 +2,8 @@ import Foundation
 @testable import Rainplay_iOS
 import Testing
 
-// Decode + normalisatie van een Open-Meteo-respons naar het interne model,
-// getest met JSON-fixtures (geen netwerk).
+/// Decode and normalization of an Open-Meteo response into the internal model,
+/// tested with JSON fixtures (no network).
 struct OpenMeteoMappingTests {
     private func data(_ json: String) -> Data { Data(json.utf8) }
 
@@ -35,21 +35,21 @@ struct OpenMeteoMappingTests {
     @Test func mapsCurrentHourlyAndMinutely() throws {
         let forecast = try makeForecast(from: data(validJSON))
 
-        #expect(forecast.currentTemperature == 21)          // 20.6 afgerond
+        #expect(forecast.currentTemperature == 21)          // 20.6 rounded
         #expect(forecast.hourly.count == 2)
 
         let night = forecast.hourly[0]
         #expect(night.time == "00:00")
-        #expect(night.kind == .cloud)                        // nacht → bewolkt
-        #expect(night.score == 6)                            // nacht-cap
-        #expect(night.sunsetMs != nil)                       // gekoppeld aan daily sunset
+        #expect(night.kind == .cloud)                        // night → cloudy
+        #expect(night.score == 6)                            // night cap
+        #expect(night.sunsetMs != nil)                       // linked to daily sunset
 
         let midday = forecast.hourly[1]
         #expect(midday.kind == .sun)
         #expect(midday.score == 10)
 
         #expect(forecast.minutely15.count == 1)
-        // Kwartier-punt erft de temperatuur van het dichtstbijzijnde uur (00:00 → 15°).
+        // The 15-minute point inherits the temperature of the nearest hour (00:00 → 15°).
         #expect(forecast.minutely15[0].temperatureC == 15)
     }
 
@@ -81,8 +81,8 @@ struct OpenMeteoMappingTests {
         }
     }
 
-    // Een geldige respons waarin Open-Meteo optionele velden weglaat mag NIET de
-    // hele decode laten falen; de ontbrekende velden vallen terug op 0.
+    /// A valid response where Open-Meteo omits optional fields must not fail the
+    /// whole decode; the missing fields fall back to 0.
     @Test func toleratesMissingOptionalHourlyFields() throws {
         let sparse = """
         {

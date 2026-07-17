@@ -2,19 +2,16 @@ import Foundation
 import Observation
 import os
 
-// Centrale app-state, vervangt de Jotai-atoms + TanStack Query uit de PWA.
-// Persistentie via UserDefaults (de gebruiker koos ervoor om, anders dan de
-// PWA, óók kleuren/lagen/schemering te bewaren).
-
+/// Central app state. Persists selection and settings (including colors, layers,
+/// and twilight) via UserDefaults.
 @MainActor
 @Observable
 final class AppModel {
-    // MARK: - Selectie
+    // MARK: - Selection
 
     var selectedDay: DayOption = .vandaag {
         didSet {
-            // Zelfde effect als in WeatherScreen.tsx: de tijdshorizon geldt
-            // alleen voor Vandaag en springt anders terug naar "Hele dag".
+            // The time horizon applies only to Today; otherwise reset to full day.
             if selectedDay != .vandaag && selectedHorizon != .heleDag {
                 selectedHorizon = .heleDag
             }
@@ -28,7 +25,7 @@ final class AppModel {
             persist(selectedLocation, key: Keys.selectedLocation)
             guard oldValue.latitude != selectedLocation.latitude
                 || oldValue.longitude != selectedLocation.longitude else { return }
-            // Nieuwe coördinaten = nieuwe "queryKey": cache weggooien en opnieuw laden.
+            // New coordinates: drop the cache and reload.
             forecast = nil
             dataTimestamp = nil
             Task { await loadForecast() }
@@ -39,14 +36,13 @@ final class AppModel {
         didSet { persist(savedLocations, key: Keys.savedLocations) }
     }
 
-    // Maximaal aantal handmatig opgeslagen locaties; daarboven moet de gebruiker
-    // er eerst één verwijderen voordat een nieuwe kan worden toegevoegd.
+    /// Maximum number of manually saved locations; beyond this the user must
+    /// remove one before adding a new one.
     let maxSavedLocations = 5
 
-    // Is er nog ruimte om een nieuwe locatie op te slaan?
     var canAddLocation: Bool { savedLocations.count < maxSavedLocations }
 
-    // MARK: - Instellingen (persistent)
+    // MARK: - Settings (persistent)
 
     var cellColors: CellColors {
         didSet { persist(cellColors, key: Keys.cellColors) }
@@ -56,62 +52,62 @@ final class AppModel {
     var showRain: Bool { didSet { defaults.set(showRain, forKey: Keys.showRain) } }
     var showIcons: Bool { didSet { defaults.set(showIcons, forKey: Keys.showIcons) } }
 
-    // W/m²-drempel waaronder de schemering-blend actief is (Settings-slider).
+    /// W/m² threshold below which the twilight blend is active (Settings slider).
     var twilightRadiation: Double {
         didSet { defaults.set(twilightRadiation, forKey: Keys.twilightRadiation) }
     }
 
-    // Voorkeur voor de temperatuureenheid; canonieke data blijft Celsius, dit
-    // werkt alleen op de presentatiegrens. Bewaard als rawValue-string.
+    /// Preferred temperature unit; canonical data stays in Celsius, this applies
+    /// only at the presentation boundary. Stored as a rawValue string.
     var temperatureUnit: TemperatureUnit {
         didSet { defaults.set(temperatureUnit.rawValue, forKey: Keys.temperatureUnit) }
     }
 
-    // Voorkeur voor de tijdnotatie (12/24-uurs); canonieke tijden blijven
-    // isoTime, dit werkt alleen op de presentatiegrens. Bewaard als rawValue.
+    /// Preferred time notation (12/24-hour); canonical times stay as `isoTime`,
+    /// this applies only at the presentation boundary. Stored as a rawValue string.
     var timeFormat: TimeFormat {
         didSet { defaults.set(timeFormat.rawValue, forKey: Keys.timeFormat) }
     }
 
-    // Voorkeur voor de datumnotatie; werkt alleen op de presentatiegrens.
+    /// Preferred date notation; applies only at the presentation boundary.
     var dateFormat: DateStyle {
         didSet { defaults.set(dateFormat.rawValue, forKey: Keys.dateFormat) }
     }
 
-    // MARK: - Forecast-state
+    // MARK: - Forecast state
 
     private(set) var forecast: Forecast?
     private(set) var isLoading = false
     private(set) var loadFailed = false
     private(set) var dataTimestamp: Date?
 
-    // Bij een koude start met GPS wachten we met laden tot de locatie
-    // "settled" is, zodat er niet éérst voor de placeholder-default en daarna
-    // nóg eens voor de echte GPS-coördinaten gefetcht wordt.
+    /// On a cold start with GPS, loading waits until the location has settled, so
+    /// it does not fetch first for the placeholder default and again for the real
+    /// GPS coordinates.
     private(set) var locationResolved = false
 
     let locationService: any LocationProviding
     let networkMonitor = NetworkMonitor()
 
     private let defaults: UserDefaults
-    // Injecteerbaar (dependency inversion) zodat tests nep-implementaties kunnen
-    // leveren zonder echte netwerk-/GPS-toegang. Standaard de echte clients.
+    /// Injectable (dependency inversion) so tests can supply fakes without real
+    /// network/GPS access. Defaults to the real clients.
     private let forecastProvider: any ForecastProviding
-    // Injecteerbare klok zodat de 5-min-versheidsgrens deterministisch te testen is.
+    /// Injectable clock so the 5-minute freshness window is deterministically testable.
     private let now: () -> Date
 
-    // Eén klokbron voor de UI: views lezen dit i.p.v. zelf Date() in hun body aan
-    // te roepen, zodat de kop en de grafiek op dezelfde "nu" gebaseerd zijn en in
-    // previews/tests injecteerbaar blijven.
+    /// Single clock source for the UI: views read this instead of calling `Date()`
+    /// in their body, so the header and chart share the same "now" and stay
+    /// injectable in previews/tests.
     var currentDate: Date { now() }
     private var loadTask: Task<Void, Never>?
-    // Loopt op bij elke nieuwe load; alleen de load met het actuele nummer mag
-    // state wegschrijven. Zo kan een geannuleerde/verouderde fetch (bijv. na een
-    // locatiewissel) niets meer overschrijven.
+    /// Incremented on each new load; only the load with the current number may
+    /// write state. A cancelled/stale fetch (e.g. after a location change) can no
+    /// longer overwrite anything.
     private var loadGeneration = 0
 
-    // Data is 5 min vers; daarna triggert terugkeer naar de app of herstel van
-    // de verbinding een nieuwe fetch (zoals staleTime in de PWA).
+    /// Data is fresh for 5 minutes; after that, returning to the app or restoring
+    /// the connection triggers a new fetch.
     private let staleInterval: TimeInterval = 5 * 60
 
     private enum Keys {
@@ -134,9 +130,9 @@ final class AppModel {
         now: @escaping () -> Date = Date.init
     ) {
         self.defaults = defaults
-        // De concrete clients hier construeren (niet als default-argument): onder
-        // MainActor-isolatie is hun init @MainActor, en default-argumenten worden
-        // nonisolated geëvalueerd.
+        // Construct the concrete clients here rather than as default arguments:
+        // under MainActor isolation their init is @MainActor, and default
+        // arguments are evaluated nonisolated.
         self.forecastProvider = forecastProvider ?? OpenMeteoClient()
         self.locationService = locationProvider ?? LocationService()
         self.now = now
@@ -161,11 +157,10 @@ final class AppModel {
         }
     }
 
-    // MARK: - Levenscyclus
+    // MARK: - Lifecycle
 
-    /// Koude start: probeer eenmalig GPS wanneer er geen opgeslagen locatie is
-    /// (zelfde gedrag als useCurrentLocation in de PWA), en laad daarna de
-    /// forecast precies één keer.
+    /// Cold start: try GPS once when there is no saved location, then load the
+    /// forecast exactly once.
     func start() async {
         guard !locationResolved else { return }
 
@@ -179,8 +174,8 @@ final class AppModel {
         }
 
         if selectedLocation.source == .fallback {
-            // refreshLocation() zet selectedLocation en triggert dáár al een
-            // fetch; locationResolved eerst zetten voorkomt een dubbele.
+            // refreshLocation() sets selectedLocation and already triggers a fetch
+            // there; setting locationResolved first avoids a duplicate.
             locationResolved = true
             let hadLocation = (try? await refreshLocation()) != nil
             if !hadLocation {
@@ -192,12 +187,12 @@ final class AppModel {
         }
     }
 
-    /// App komt terug naar de voorgrond (scenePhase → .active).
+    /// App returns to the foreground (scenePhase → .active).
     func appBecameActive() async {
         await loadForecastIfStale()
     }
 
-    // MARK: - Locatie
+    // MARK: - Location
 
     @discardableResult
     func refreshLocation() async throws -> ForecastLocation {
@@ -206,9 +201,9 @@ final class AppModel {
         return location
     }
 
-    // Selecteert een locatie en bewaart hem indien nog niet opgeslagen. Geeft
-    // false terug wanneer het opslaan-maximum bereikt is en het om een nieuwe
-    // locatie gaat; de selectie verandert dan niet zodat de UI feedback kan tonen.
+    /// Selects a location and saves it if not already stored. Returns false when
+    /// the save limit is reached for a new location; the selection then stays
+    /// unchanged so the UI can show feedback.
     @discardableResult
     func chooseLocation(_ location: ForecastLocation) -> Bool {
         if savedLocations.contains(where: { ForecastLocation.isSame($0, location) }) {
@@ -228,12 +223,11 @@ final class AppModel {
         }
     }
 
-    // MARK: - Forecast laden
+    // MARK: - Loading the forecast
 
     func loadForecast() async {
-        // Annuleer een eventuele lopende load (bijv. voor de vorige locatie) en
-        // start er één voor de huidige selectedLocation. De generatie-guard in
-        // performLoad zorgt dat de geannuleerde load geen state meer schrijft.
+        // Cancel any in-flight load and start one for the current selectedLocation.
+        // The generation guard in performLoad keeps the cancelled load from writing state.
         loadTask?.cancel()
         loadGeneration += 1
         let generation = loadGeneration
@@ -244,8 +238,8 @@ final class AppModel {
 
     func loadForecastIfStale() async {
         guard locationResolved else { return }
-        // Loopt er al een load? Lift dan mee i.p.v. een tweede request te sturen
-        // (dekt snel achter elkaar foreground + reconnect af).
+        // If a load is already running, join it instead of sending a second
+        // request (covers rapid foreground + reconnect).
         if let loadTask {
             await loadTask.value
             return
@@ -262,14 +256,13 @@ final class AppModel {
     }
 
     private func performLoad(generation: Int) async {
-        // Al vervangen voordat we begonnen? Dan niets doen.
         guard generation == loadGeneration else { return }
         if forecast == nil { isLoading = true }
         loadFailed = false
 
-        // Zelfde retry-beleid als de PWA: een afgebroken mobiele verbinding
-        // wordt nog 2x geprobeerd met oplopende vertraging; een 4xx (vooral
-        // 429 rate-limit) niet — dat hamert een overbelaste API alleen verder.
+        // A dropped mobile connection is retried twice more with increasing delay;
+        // a 4xx (especially 429 rate-limit) is not, to avoid hammering an
+        // overloaded API.
         let location = selectedLocation
         var attempt = 0
         var loaded: Forecast?
@@ -298,7 +291,7 @@ final class AppModel {
             }
         }
 
-        // Alleen de actuele (niet-geannuleerde/vervangen) load mag state zetten.
+        // Only the current (non-cancelled/replaced) load may set state.
         guard generation == loadGeneration else { return }
         if let loaded {
             forecast = loaded
@@ -311,7 +304,7 @@ final class AppModel {
         loadTask = nil
     }
 
-    // MARK: - Persistentie-helpers
+    // MARK: - Persistence helpers
 
     private func persist<T: Encodable>(_ value: T, key: String) {
         if let data = try? JSONEncoder().encode(value) {

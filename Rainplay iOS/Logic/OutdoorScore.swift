@@ -1,53 +1,50 @@
 import Foundation
 
-// Enige bron van waarheid voor de 0-10 outdoor score.
-// 1:1 geport uit de PWA (src/lib/outdoorScore.ts).
-//
-// De neerslag-straf volgt weatherKind(): een uur is "regen" (regen-/motregen-
-// icoon) zodra precip >= 0,2 mm OF het weather_code een motregen-/regen-code is.
-// `kind == .rain` is dus het signaal "het regent/motregent", ook als er nog
-// maar een spoortje neerslag (< 0,2 mm) gemeten wordt — typisch motregen.
-//
-// IJkpunten (bij ideale temp):
-//   echt droog (<0,2 mm, geen regen-code) → telt als droog, score volgt icoon (sun/partly/cloud)
-//   motregen-code, spoor (<0,2 mm)        → ~6  (consistent met regen-icoon, lichter dan echte regen)
-//   lichte regen (~0,3 mm)                → ~5  (lichte onvoldoende)
-//   bewolkt + aangenaam                   → 7-8
-//   bewolkt + koud                        → ~6
-//   zon met bewolking                     → 8-9
-//   echt zonnig                           → 9-10
+/// Single source of truth for the 0-10 outdoor score.
+///
+/// The precipitation penalty follows weatherKind(): an hour is "rain" once precip
+/// >= 0.2 mm OR the weather_code is a drizzle/rain code. So `kind == .rain` is the
+/// "it's raining/drizzling" signal, even with only a trace (< 0.2 mm) measured.
+///
+/// Reference points (at ideal temperature):
+///   truly dry (<0.2 mm, no rain code) → dry, score follows icon (sun/partly/cloud)
+///   drizzle code, trace (<0.2 mm)     → ~6  (matches rain icon, lighter than real rain)
+///   light rain (~0.3 mm)              → ~5  (mild fail)
+///   cloudy + pleasant                 → 7-8
+///   cloudy + cold                     → ~6
+///   sun with cloud                    → 8-9
+///   truly sunny                       → 9-10
 
 private nonisolated func precipitationPenalty(_ mm: Double, isRainCoded: Bool) -> Double {
     if mm < 0.2 {
-        // Echt droog: geen regen-icoon → geen straf (sluit aan op kind sun/partly/cloud).
-        // Motregen-code met spoortje neerslag → regen-icoon, dus een lichte straf zodat
-        // de score onder een motregen-uur zakt. Lichter dan de 0,2-0,5 mm-band, zodat
-        // motregen nooit lager scoort dan echte lichte regen.
+        // Drizzle code with a trace of precip still shows the rain icon, so apply a
+        // light penalty to drop the score below a drizzle hour. Lighter than the
+        // 0.2-0.5 mm band so drizzle never scores lower than real light rain.
         return isRainCoded ? 2.5 : 0
     }
-    if mm <= 0.5 { return 3.5 }  // motregen/drizzle → ~4-5
-    if mm <= 1 { return 6 }      // licht nat        → ~2-3
-    if mm <= 2 { return 8 }      // matig            → ~1
-    return 10                    // zwaar            → 0
+    if mm <= 0.5 { return 3.5 }  // drizzle
+    if mm <= 1 { return 6 }      // lightly wet
+    if mm <= 2 { return 8 }      // moderate
+    return 10                    // heavy
 }
 
 private nonisolated func temperaturePenalty(_ c: Double) -> Double {
-    if c >= 14 && c <= 22 { return 0 }  // ideaal
+    if c >= 14 && c <= 22 { return 0 }  // ideal
     if c > 22 && c <= 26 { return 0.5 }
     if c > 26 && c <= 30 { return 1.5 }
     if c > 30 { return 4 }
-    if c >= 12 { return 1 }             // fris maar prima
-    if c >= 8 { return 2 }              // koud voor wielrenner
-    if c >= 4 { return 3 }              // erg koud
-    return 4                            // <4°C of >30°C
+    if c >= 12 { return 1 }             // crisp but fine
+    if c >= 8 { return 2 }              // cold
+    if c >= 4 { return 3 }              // very cold
+    return 4                            // <4°C
 }
 
 private nonisolated func kindPenalty(_ kind: WeatherKind) -> Double {
     switch kind {
-    case .sun: return 0     // ideaal
-    case .partly: return 1  // zon met bewolking → 8-9
-    case .cloud: return 2   // bewolkt           → 7-8
-    case .rain: return 2    // regen-icoon: extra aftrek → regen altijd ≤5
+    case .sun: return 0
+    case .partly: return 1
+    case .cloud: return 2
+    case .rain: return 2  // extra deduction so rain always scores ≤5
     }
 }
 
@@ -62,6 +59,6 @@ nonisolated func outdoorScore(
         - temperaturePenalty(temperatureC)
         - kindPenalty(kind)
     let score = Int(max(0, min(10, raw.rounded())))
-    // Nacht: altijd maximaal 6 — het blijft donker, hoe droog of warm ook
+    // Night caps at 6: it stays dark however dry or warm it is.
     return isDay ? score : min(score, 6)
 }

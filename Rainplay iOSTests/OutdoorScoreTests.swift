@@ -1,7 +1,6 @@
 @testable import Rainplay_iOS
 import Testing
 
-// Port van src/lib/outdoorScore.test.ts uit de PWA.
 struct OutdoorScoreTests {
     private func score(
         precip: Double = 0,

@@ -2,7 +2,6 @@ import Foundation
 @testable import Rainplay_iOS
 import Testing
 
-// Port van src/lib/weatherView.test.ts + weatherView.todayHorizon.test.ts.
 struct WeatherViewTests {
     private func hour(
         _ iso: String,
@@ -73,8 +72,8 @@ struct WeatherViewTests {
     @Test func weekSummarisesOnePointPerDay() {
         let selected = visibleHoursForSelection(hours, day: .week, horizon: .heleDag)
         #expect(selected.count == 3)
-        // Identiteits-`time` is nu een dagsleutel (uniek per dag); de weekdag
-        // wordt in de view locale-aware uit isoTime geformatteerd.
+        // Identity `time` is a day key (unique per day); the weekday is formatted
+        // locale-aware from isoTime in the view.
         #expect(selected.map(\.time) == ["2026-06-11", "2026-06-12", "2026-06-13"])
         #expect(selected.map { String($0.isoTime.prefix(10)) } == ["2026-06-11", "2026-06-12", "2026-06-13"])
         #expect(selected[1].kind == .sun)
@@ -103,19 +102,18 @@ struct WeatherViewTests {
         let plus2 = visiblePointsForTodayHorizon(hourly: hours, minutely15: minutely, horizon: .plus2, now: now)
         let plus6 = visiblePointsForTodayHorizon(hourly: hours, minutely15: minutely, horizon: .plus6, now: now)
 
-        // +6 begint op het laatste :00/:30 vóór nu (10:30), elke 30 min.
+        // +6 starts at the last :00/:30 before now (10:30), every 30 min.
         #expect(plus6.map(\.time) == ["10:30", "11:00", "11:30", "12:00"])
 
-        // +2 is geïnterpoleerd naar HETZELFDE aantal punten als +6 (voor het
-        // morph-effect), start op dezelfde 10:30 en eindigt op het einde van het
-        // 2-uursvenster.
+        // +2 is interpolated to the same number of points as +6 (for the morph
+        // effect), starts at the same 10:30, and ends at the end of the 2-hour window.
         #expect(plus2.count == plus6.count)
         #expect(plus2.first?.time == "10:30")
         #expect(plus2.last?.time == "12:15")
     }
 
+    /// Full window (24 quarter-hour points): +2 and +6 must have equal point counts.
     @Test func plus2AndPlus6HaveEqualPointCount() {
-        // Vol venster (24 kwartierpunten): +2 en +6 moeten evenveel punten hebben.
         let now = Calendar.current.date(from: DateComponents(year: 2026, month: 6, day: 11, hour: 10, minute: 0))!
         let minutely = (0..<24).map { i -> HourlyWeather in
             let total = 10 * 60 + i * 15

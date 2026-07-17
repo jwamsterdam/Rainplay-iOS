@@ -1,15 +1,15 @@
 import SwiftUI
 
-// Hoofdscherm (src/screens/WeatherScreen.tsx). Hero met foto-achtergrond en de
-// witte "decision sheet" eronder met ronde bovenhoeken.
+/// Main screen: a photo-backed hero above a white decision sheet with rounded
+/// top corners.
 struct WeatherScreen: View {
     @Bindable var model: AppModel
     @State private var settingsOpen = false
     @State private var locationMenuOpen = false
     @Environment(\.colorScheme) private var colorScheme
 
-    // Alle afgeleide kop-informatie in één keer berekend (temperatuur, datum,
-    // beste-moment-venster, adviesteksten) — zie DecisionSummary.
+    /// All derived header information computed in one pass: temperature, date,
+    /// best-moment window and advice text. See DecisionSummary.
     private var summary: DecisionSummary {
         decisionSummary(
             forecast: model.forecast,
@@ -28,9 +28,9 @@ struct WeatherScreen: View {
             decisionSheet()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        // De hero-foto vult het volledige scherm ACHTER de content; door hem als
-        // achtergrond te zetten (i.p.v. als ZStack-laag) blijft de content zelf
-        // binnen de safe area — anders schuift de kop achter de Dynamic Island.
+        // As a background (not a ZStack layer) the hero photo fills the screen
+        // behind the content while the content stays within the safe area,
+        // otherwise the header slides behind the Dynamic Island.
         .background(heroBackground)
         .sheet(isPresented: $settingsOpen) {
             SettingsSheet(model: model)
@@ -40,8 +40,8 @@ struct WeatherScreen: View {
         }
     }
 
-    // Formatteert de canonieke kop-datum via de gekozen datum-notatie; nil bij
-    // ontbrekende data zodat de view het label weglaat.
+    /// Formats the canonical header date using the chosen date style; returns nil
+    /// when data is missing so the view can omit the label.
     private func headerDateText(_ header: HeaderDate) -> String? {
         switch header {
         case .none:
@@ -64,9 +64,9 @@ struct WeatherScreen: View {
             .overlay(heroOverlay.ignoresSafeArea())
     }
 
-    // De luchtfoto zelf blijft in beide modi gelijk. In licht ligt er een zachte
-    // witte gloed overheen; in donker een donker scrim dat de foto dimt zodat de
-    // (dan lichte) hero-tekst goed leesbaar blijft.
+    /// The sky photo is identical in both modes. Light mode adds a soft white
+    /// glow; dark mode adds a dark scrim that dims the photo so the light hero
+    /// text stays legible.
     private var heroOverlay: some View {
         Group {
             if colorScheme == .dark {
@@ -89,7 +89,6 @@ struct WeatherScreen: View {
 
     private func hero(_ summary: DecisionSummary) -> some View {
         VStack(spacing: 0) {
-            // Locatiekiezer + tandwiel
             ZStack(alignment: .topTrailing) {
                 Button {
                     locationMenuOpen = true
@@ -111,9 +110,8 @@ struct WeatherScreen: View {
                 .buttonStyle(.plain)
                 .frame(maxWidth: .infinity)
 
-                // De settings zijn alleen aanwezig in dev builds (Debug-configuratie);
-                // in een prod/Release-build (o.a. App Store-archive) is DEBUG niet
-                // gedefinieerd en verdwijnt de knop volledig uit de UI.
+                // Settings exist only in Debug builds; DEBUG is undefined in
+                // Release (including App Store archives), so the button disappears.
                 #if DEBUG
                 Button {
                     settingsOpen = true
@@ -147,11 +145,11 @@ struct WeatherScreen: View {
                     .accessibilityLabel(summary.temperature
                         .map { Text("a11y.temperatureDegrees \(temperatureValue(celsius: $0, unit: model.temperatureUnit))") }
                         ?? Text("a11y.temperatureUnknown"))
-                // Alleen tonen wanneer er een echt venster is; bij lege/mislukte
-                // data draagt de samenvatting de boodschap i.p.v. "Buiten vanaf --:--".
+                // Only shown when a real window exists; on empty/failed data the
+                // summary carries the message instead of "Outside from --:--".
                 if let bestStart = summary.bestStart {
-                    // In de week-weergave toont de kop een dag ("Buiten vanaf
-                    // woensdag") i.p.v. een tijdstip; overige dagen een tijd.
+                    // Week view shows a day ("Outside from Wednesday"); other days
+                    // show a time.
                     let startText = model.selectedDay == .week
                         ? weekdayName(date: bestStart)
                         : timeString(date: bestStart, format: model.timeFormat)
@@ -170,7 +168,6 @@ struct WeatherScreen: View {
         }
         .padding(.horizontal, 22)
         .padding(.top, 10)
-        // Ruimte tussen de subtitel en de bovenrand van de witte decision-sheet.
         .padding(.bottom, 22)
     }
 
@@ -203,9 +200,8 @@ struct WeatherScreen: View {
         }
         .padding(.top, 6)
         .padding(.horizontal, 10)
-        // Trekt de attributie iets richting de home-indicator (net als de PWA,
-        // die ~16px van de safe-area-inset aftrekt) zodat de ondermarge niet te
-        // groot wordt; de witte achtergrond loopt er wél achterlangs door.
+        // Pulls the attribution toward the home indicator so the bottom margin
+        // isn't too large; the white background still runs behind it.
         .padding(.bottom, -14)
         .frame(maxWidth: .infinity)
         .background(

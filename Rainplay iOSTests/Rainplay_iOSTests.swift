@@ -2,7 +2,6 @@
 //  Rainplay_iOSTests.swift
 //  Rainplay iOSTests
 //
-//  De daadwerkelijke tests staan in aparte bestanden per onderwerp:
-//  OutdoorScoreTests, BestWindowTests, SkyGradientTests, WeatherViewTests,
-//  NowMarkerTests en AppModelFetchTests.
+//  Tests live in separate files by topic (e.g. OutdoorScoreTests, BestWindowTests,
+//  SkyGradientTests, WeatherViewTests, NowMarkerTests, AppModelFetchTests).
 //

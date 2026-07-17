@@ -12,8 +12,7 @@ struct ContentView: View {
 
     var body: some View {
         WeatherScreen(model: model)
-            // Laat tekst meeschalen met de Dynamic Type-voorkeur, maar begrens de
-            // bovenkant zodat het pixel-getunede hero-ontwerp niet uit elkaar valt.
+            // Cap the upper Dynamic Type range so the pixel-tuned hero layout stays intact.
             .dynamicTypeSize(.xSmall ... .accessibility1)
     }
 }

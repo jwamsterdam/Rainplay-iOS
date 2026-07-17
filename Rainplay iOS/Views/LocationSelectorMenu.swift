@@ -1,9 +1,8 @@
 import SwiftUI
 import UIKit
 
-// Locatiekiezer (src/components/LocationSelector.tsx). Native sheet met de
-// huidige-locatie-rij (GPS), opgeslagen locaties (met verwijderknop voor
-// handmatige) en een zoekveld met debounce.
+/// Location picker sheet with the current-location (GPS) row, saved locations
+/// (deletable when manual), and a debounced search field.
 struct LocationSelectorMenu: View {
     @Bindable var model: AppModel
     @Binding var isPresented: Bool
@@ -96,8 +95,8 @@ struct LocationSelectorMenu: View {
                     _ = try await model.refreshLocation()
                     isPresented = false
                 } catch {
-                    // Blijf open; status is nu .denied → locationDeniedRow toont
-                    // een uitleg met een knop naar Instellingen.
+                    // Stay open; status is now .denied, so locationDeniedRow explains
+                    // the situation with a button to Settings.
                 }
             }
         } label: {
@@ -119,8 +118,8 @@ struct LocationSelectorMenu: View {
         .disabled(model.locationService.status == .locating)
     }
 
-    // Getoond na een geweigerde locatie-aanvraag: kalme uitleg + directe knop
-    // naar de systeeminstellingen (App Review test dit pad expliciet).
+    /// Shown after a denied location request: a calm explanation plus a direct
+    /// button to system settings. App Review tests this path explicitly.
     private var locationDeniedRow: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("location.deniedMessage")
@@ -161,8 +160,8 @@ struct LocationSelectorMenu: View {
     }
 
     private func choose(_ location: ForecastLocation) {
-        // Bij een bereikt maximum weigert het model een nieuwe locatie; de
-        // blijvende hint in de zoeksectie legt al uit dat er eerst één weg moet.
+        // At the maximum the model rejects a new location; the persistent hint in
+        // the search section already explains that one must be removed first.
         guard model.chooseLocation(location) else { return }
         query = ""
         suggestions = []
@@ -179,7 +178,7 @@ struct LocationSelectorMenu: View {
             return
         }
 
-        // Debounce: 250 ms wachten; wordt geannuleerd zodra query verandert.
+        // Debounce: wait 250 ms; cancelled as soon as the query changes.
         try? await Task.sleep(for: .milliseconds(250))
         if Task.isCancelled { return }
 

@@ -1,8 +1,8 @@
 import Foundation
 
-// Abstracties voor de externe afhankelijkheden van AppModel (dependency
-// inversion). Zo is de app-state te testen met nep-implementaties, zonder echte
-// netwerk- of GPS-toegang, en zijn de concrete clients verwisselbaar.
+// Abstractions for AppModel's external dependencies (dependency inversion), so app
+// state can be tested with fake implementations without real network or GPS access,
+// and the concrete clients stay interchangeable.
 
 @MainActor
 protocol ForecastProviding {

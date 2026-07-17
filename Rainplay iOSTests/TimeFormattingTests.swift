@@ -2,30 +2,28 @@ import Foundation
 @testable import Rainplay_iOS
 import Testing
 
-// De pure tijd/datum-presentatiehelpers: 12/24-uurs-forcering, `.system`-
-// resolutie via de locale, en locale-aware datumnotatie. Locale wordt
-// geïnjecteerd zodat de tests niet van het apparaat of zijn 12/24-uurs-
-// instelling afhangen.
+/// Pure time/date presentation helpers: forced 12/24-hour, `.system` resolution
+/// via the locale, and locale-aware date notation. Locale is injected so the tests
+/// don't depend on the device or its 12/24-hour setting.
 struct TimeFormattingTests {
     private let us = Locale(identifier: "en_US")
     private let nl = Locale(identifier: "nl_NL")
     private let gb = Locale(identifier: "en_GB")
 
-    // Vaste kalenderdatum, tijdzone-onafhankelijk gebouwd zodat de test in elke
-    // omgeving hetzelfde uur oplevert.
+    /// Fixed calendar date, built independent of time zone so the test yields the
+    /// same hour in any environment.
     private func iso(_ hour: Int, _ minute: Int = 0) -> String {
         String(format: "2026-07-11T%02d:%02d", hour, minute)
     }
 
-    // Date.FormatStyle scheidt de tijd en AM/PM met een narrow no-break space
-    // (U+202F); normaliseer naar een gewone spatie zodat de assertions leesbaar
-    // en stabiel blijven.
+    /// Date.FormatStyle separates the time and AM/PM with a narrow no-break space
+    /// (U+202F); normalize to a regular space so assertions stay readable and stable.
     private func normalized(_ s: String) -> String {
         s.replacingOccurrences(of: "\u{202F}", with: " ")
             .replacingOccurrences(of: "\u{00A0}", with: " ")
     }
 
-    // MARK: - Geforceerde 24-uurs
+    // MARK: - Forced 24-hour
 
     @Test func twentyFourHourForcesZeroPaddedClock() {
         #expect(timeString(isoTime: iso(13), format: .twentyFourHour, locale: us) == "13:00")
@@ -33,34 +31,34 @@ struct TimeFormattingTests {
         #expect(timeString(isoTime: iso(9, 30), format: .twentyFourHour, locale: nl) == "09:30")
     }
 
-    // MARK: - Geforceerde 12-uurs
+    // MARK: - Forced 12-hour
 
+    /// 13:00 → "1:00 PM", midnight → "12:00 AM", noon → "12:00 PM".
     @Test func twelveHourForcesAmPm() {
-        // 13:00 → "1:00 PM", middernacht → "12:00 AM", middag → "12:00 PM".
         #expect(normalized(timeString(isoTime: iso(13), format: .twelveHour, locale: us)) == "1:00 PM")
         #expect(normalized(timeString(isoTime: iso(0), format: .twelveHour, locale: us)) == "12:00 AM")
         #expect(normalized(timeString(isoTime: iso(12), format: .twelveHour, locale: us)) == "12:00 PM")
     }
 
-    // MARK: - As-labels zonder AM/PM
+    // MARK: - Axis labels without AM/PM
 
+    /// Compact x-axis: 12-hour without AM/PM, 24-hour stays HH:mm.
     @Test func axisTimeOmitsAmPm() {
-        // Compacte x-as: 12-uurs zonder AM/PM, 24-uurs blijft HH:mm.
         let twelve = normalized(axisTimeString(isoTime: iso(13), format: .twelveHour, locale: us))
         #expect(twelve == "1:00")
         #expect(!twelve.contains("PM") && !twelve.contains("AM"))
         #expect(axisTimeString(isoTime: iso(13), format: .twentyFourHour, locale: us) == "13:00")
     }
 
-    // MARK: - .system volgt de locale
+    // MARK: - .system follows the locale
 
+    /// nl_NL is a 24-hour locale.
     @Test func systemUses24HourInNL() {
-        // nl_NL is een 24-uurs-locale.
         #expect(timeString(isoTime: iso(13), format: .system, locale: nl) == "13:00")
     }
 
+    /// en_US is a 12-hour locale → AM/PM.
     @Test func systemUses12HourInUS() {
-        // en_US is een 12-uurs-locale → AM/PM.
         let midday = timeString(isoTime: iso(13), format: .system, locale: us)
         #expect(midday.contains("1"))
         #expect(midday.uppercased().contains("PM"))
@@ -70,16 +68,16 @@ struct TimeFormattingTests {
         #expect(timeString(isoTime: iso(13), format: .system, locale: gb) == "13:00")
     }
 
-    // MARK: - Datum
+    // MARK: - Date
 
     @Test func dateLabelIsLocaleAwareInOrderAndLanguage() {
         let date = IsoTime.date("2026-07-01T12:00")
-        // Nederlands: dag vóór maand, korte weekdag.
+        // Dutch: day before month, short weekday.
         let nlLabel = dateLabel(date: date, style: .weekdayDayMonth, locale: nl)
         #expect(nlLabel.contains("1"))
         #expect(nlLabel.lowercased().contains("jul"))
 
-        // US zet de maand vooraan.
+        // US puts the month first.
         let usLabel = dateLabel(date: date, style: .dayMonth, locale: us)
         #expect(usLabel.contains("Jul"))
         #expect(usLabel.contains("1"))
@@ -106,14 +104,14 @@ struct TimeFormattingTests {
         #expect(label.hasPrefix(dateLabel(date: from, style: .dayMonth, locale: nl)))
     }
 
+    /// 2026-07-01 is a Wednesday.
     @Test func weekdayLabelIsLocaleAware() {
-        // 2026-07-01 is een woensdag.
         let date = IsoTime.date("2026-07-01T12:00")
         #expect(weekdayLabel(date: date, locale: nl).lowercased().hasPrefix("wo"))
         #expect(weekdayLabel(date: date, locale: us).lowercased().hasPrefix("wed"))
     }
 
-    // MARK: - Date-overload consistent met isoTime-overload
+    // MARK: - Date overload consistent with isoTime overload
 
     @Test func dateOverloadMatchesIsoOverload() {
         let isoTime = iso(15, 45)

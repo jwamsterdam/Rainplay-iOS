@@ -2,10 +2,9 @@ import Foundation
 @testable import Rainplay_iOS
 import Testing
 
-// Tests voor het opslaan/verwijderen van locaties in AppModel: nieuwe locaties
-// worden bewaard, het maximum wordt afgedwongen, en verwijderen valt netjes
-// terug op een resterende (of de default) locatie. Geen netwerk/GPS: de
-// forecastbron is een no-op stub.
+/// Exercises saving and deleting locations in AppModel: new locations are kept,
+/// the maximum is enforced, and deletion falls back to a remaining (or the default)
+/// location. No network or GPS: the forecast source is a no-op stub.
 @MainActor
 struct AppModelLocationTests {
     @MainActor final class StubForecastProvider: ForecastProviding {
@@ -55,8 +54,8 @@ struct AppModelLocationTests {
         #expect(model.savedLocations.count == model.maxSavedLocations)
         #expect(!model.canAddLocation)
 
-        // De zesde locatie wordt geweigerd; selectie én lijst blijven ongewijzigd.
-        let overflow = model.chooseLocation(location("Zesde"))
+        // The sixth location is rejected; selection and list stay unchanged.
+        let overflow = model.chooseLocation(location("Sixth"))
         #expect(!overflow)
         #expect(model.savedLocations.count == model.maxSavedLocations)
         #expect(model.selectedLocation.name == "Plaats \(model.maxSavedLocations - 1)")
@@ -68,7 +67,7 @@ struct AppModelLocationTests {
             model.chooseLocation(location("Plaats \(i)"))
         }
 
-        // Ook aan het maximum blijft het kiezen van een bestaande locatie werken.
+        // Even at the maximum, choosing an existing location still works.
         let selected = model.chooseLocation(location("Plaats 0"))
 
         #expect(selected)
@@ -81,7 +80,7 @@ struct AppModelLocationTests {
         model.chooseLocation(location("Utrecht"))
         model.chooseLocation(location("Delft"))
 
-        model.deleteLocation(location("Delft")) // de huidige selectie
+        model.deleteLocation(location("Delft")) // the current selection
 
         #expect(model.savedLocations.count == 1)
         #expect(model.selectedLocation.name == "Utrecht")

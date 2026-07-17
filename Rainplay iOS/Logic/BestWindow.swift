@@ -1,11 +1,8 @@
 import Foundation
 
-// Beste-buitenmoment-logica, 1:1 geport uit de PWA (src/lib/chart.ts).
-
-// Canonieke start/eind van het venster. `start` is altijd het begintijdstip;
-// `end` is nil voor week-samenvattingen (die hebben geen tijd binnen de dag).
-// Views formatteren deze via TimeFormatting; de logica leest nooit een
-// vooraf gerenderde tijdstring.
+/// Canonical start/end of a window. `start` is always the begin time; `end` is
+/// nil for week summaries (which have no time within the day). Views format
+/// these via TimeFormatting; the logic never reads a pre-rendered time string.
 struct OutdoorWindow: Equatable {
     var startIndex: Int
     var endIndex: Int
@@ -13,17 +10,17 @@ struct OutdoorWindow: Equatable {
     var end: Date?
 }
 
-// Dagperiode-token. Presentatievrij: de view mapt dit naar gelokaliseerde tekst
-// (zie OutdoorSummary+Localized), zodat de logica geen zinnen samenstelt.
+/// Presentation-free day-period token; the view maps it to localized text (see
+/// OutdoorSummary+Localized) so the logic never assembles sentences.
 enum DayPeriod: Equatable {
     case morning
     case afternoon
     case evening
 }
 
-// Nuance-regel onder het verdict als presentatievrij token: benoemt de beste
-// dagperiode en of er regen vóór/ná het venster valt. De view mapt dit naar één
-// gelokaliseerde zin (incl. het periode-woord) i.p.v. strings samen te plakken.
+/// Presentation-free token for the nuance line under the verdict: names the best
+/// day period and whether rain falls before/after the window. The view maps it
+/// to a single localized sentence (including the period word).
 enum OutdoorSummary: Equatable {
     case none
     case clear(period: DayPeriod)
@@ -32,8 +29,8 @@ enum OutdoorSummary: Equatable {
     case betweenShowers(period: DayPeriod)
 }
 
-// Nuance-regel onder het verdict: benoemt de beste dagperiode en waarschuwt voor
-// regen vóór of ná het venster.
+/// Nuance line under the verdict: names the best day period and warns about rain
+/// before or after the window.
 func outdoorSummary(_ hours: [HourlyWeather], bestWindow: OutdoorWindow?) -> OutdoorSummary {
     guard let bestWindow else { return .none }
 
@@ -80,16 +77,16 @@ func bestOutdoorWindow(_ hours: [HourlyWeather]) -> OutdoorWindow? {
     let preferredWindows = contiguousWindows(hours) { hour in
         hour.isDay && hour.score >= minimumGoodScore && isDry(hour)
     }
-    // Int.min speelt de rol van -Infinity in de PWA: zijn álle uren regen, dan
-    // matcht het fallback-predicaat niets en valt de keten door naar score-only.
+    // Int.min acts as -infinity: if every hour is rain, the fallback predicate
+    // matches nothing and the chain falls through to score-only.
     let bestNonRainScore = hours.filter { $0.kind != .rain }.map(\.score).max() ?? Int.min
     let fallbackWindows = contiguousWindows(hours) { hour in
         hour.score >= bestNonRainScore && hour.kind != .rain
     }
     let scoreOnlyWindows = contiguousWindows(hours) { hour in hour.score >= bestScore }
 
-    // Kies de eerste niet-lege kandidatenlijst in prioriteitsvolgorde; valt
-    // terug op score-only als alle voorkeurslijsten leeg zijn.
+    // Pick the first non-empty candidate list in priority order; fall back to
+    // score-only when all preferred lists are empty.
     let windows = [brightWindows, practicalPreferredWindows, preferredWindows, fallbackWindows]
         .first { !$0.isEmpty } ?? scoreOnlyWindows
 
@@ -142,12 +139,12 @@ private func windowFromIndexes(_ hours: [HourlyWeather], _ startIndex: Int, _ en
     )
 }
 
-// Canonieke eindtijd van het venster als Date. Bij week-samenvattingen (dag-
-// sleutels zonder tijd binnen de dag) is er geen intra-day eindtijd → nil.
+/// Window end time as a Date. Week summaries use day keys with no time within
+/// the day, so there is no intra-day end time and this returns nil.
 private func endDateForWindow(_ hours: [HourlyWeather], _ endIndex: Int) -> Date? {
     if endIndex + 1 < hours.count { return IsoTime.date(hours[endIndex + 1].isoTime) }
 
-    // Week-weergave: de identiteits-`time` is een dagsleutel zonder ":".
+    // Week view: the identity `time` is a day key without ":".
     if !hours[endIndex].time.contains(":") { return nil }
 
     let stepMs = inferStepMs(hours.map { IsoTime.ms($0.isoTime) })

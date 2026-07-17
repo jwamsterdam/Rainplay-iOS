@@ -1,32 +1,29 @@
 import Foundation
 
-// Pure grafiek-geometrie: de dubbele-as-normalisatie waarmee de temperatuurlijn
-// op dezelfde y-schaal als de regen-bars past. Losgetrokken uit de DayChart-view
-// zodat de rekenlogica (grenzen, ticks, terugrekenen) apart testbaar is —
-// consistent met score/venster/gradient die ook pure helpers zijn.
+/// Pure chart geometry: the dual-axis normalization that fits the temperature
+/// line onto the same y-scale as the rain bars. Split out from the DayChart view
+/// so the math (bounds, ticks, inverse mapping) is testable on its own.
 struct ChartGeometry: Equatable {
-    // Bovenkant van de regen-as (mm). Minimaal 3 mm — zo lijkt 1 mm niet ineens
-    // "veel" — maar groeit mee zodra de neerslag daarboven komt, zodat balken
-    // nooit boven de grafiek uitlopen.
+    /// Top of the rain axis (mm). At least 3 mm so 1 mm never looks like "a lot",
+    /// but grows once precipitation exceeds it so bars never overshoot the chart.
     let rainMax: Double
     let tempMin: Double
     let tempMax: Double
 
-    // Vaste ondergrens van de regen-as.
+    /// Fixed lower bound of the rain axis.
     static let minimumRainMax: Double = 3
 
-    // Marge (mm) die boven de hoogste bar wordt opgeteld vóór het omhoog afronden,
-    // zodat een balk de bovenrand van de grafiek nooit raakt (bijv. een week-piek
-    // van precies 3 mm wordt een as van 4 i.p.v. 3).
+    /// Margin (mm) added above the tallest bar before rounding up, so a bar never
+    /// touches the top edge (e.g. a week peak of exactly 3 mm yields an axis of 4).
     static let rainHeadroomMm: Double = 0.5
 
-    // Uit een expliciet temperatuurbereik + neerslagpiek (de gemeten data). Zo kan
-    // één gedeelde geometrie over alle dag-panelen worden gebruikt, zodat de
-    // grafieken vergelijkbaar zijn bij het swipen.
-    //
-    // Temp-marges: onder ≥1° afgerond op even graden (nette basis + ticks); boven
-    // een strakke ~1° (niet opgerond naar even, dat gaf tot ~3° lucht) zodat de
-    // lijn dicht bij de bovenrand komt en een warme dag ook echt "hoog" oogt.
+    /// Builds geometry from an explicit temperature range plus precipitation peak,
+    /// so one shared geometry can span all day panels and keep charts comparable
+    /// while swiping.
+    ///
+    /// Temp margins: lower bound rounded down to even degrees for tidy ticks; upper
+    /// bound a tight ~1° (not rounded to even, which added up to ~3° of slack) so
+    /// the line sits near the top and a warm day reads as genuinely high.
     init(temperatureRange range: ClosedRange<Double>?, precipitationMax: Double?) {
         rainMax = max(Self.minimumRainMax, ((precipitationMax ?? 0) + Self.rainHeadroomMm).rounded(.up))
 
@@ -37,11 +34,11 @@ struct ChartGeometry: Equatable {
         }
         let lo = ((range.lowerBound - 1) / 2).rounded(.down) * 2
         let hi = (range.upperBound + 1).rounded(.up)
-        tempMin = lo >= hi ? hi - 2 : lo         // vlakke reeks → toch een bereik
+        tempMin = lo >= hi ? hi - 2 : lo         // flat series still yields a range
         tempMax = hi
     }
 
-    // Gemak: één grafiek op basis van z'n eigen uren.
+    /// Convenience: one chart from its own hours.
     init(hours: [HourlyWeather]) {
         self.init(
             temperatureRange: ChartGeometry.temperatureRange(in: hours),
@@ -49,13 +46,13 @@ struct ChartGeometry: Equatable {
         )
     }
 
-    // MARK: - Gemeten bereiken
+    // MARK: - Measured ranges
 
     static func temperatureRange(in hours: [HourlyWeather]) -> ClosedRange<Double>? {
         temperatureRange(across: [hours])
     }
 
-    // Gecombineerd temperatuurbereik over meerdere sets uren (gedeelde as).
+    /// Combined temperature range across multiple hour sets (shared axis).
     static func temperatureRange(across groups: [[HourlyWeather]]) -> ClosedRange<Double>? {
         let temps = groups.flatMap { $0.map(\.temperatureC) }
         guard let lo = temps.min(), let hi = temps.max() else { return nil }
@@ -66,22 +63,22 @@ struct ChartGeometry: Equatable {
         precipitationMax(across: [hours])
     }
 
-    // Hoogste neerslag over meerdere sets uren (gedeelde as).
+    /// Highest precipitation across multiple hour sets (shared axis).
     static func precipitationMax(across groups: [[HourlyWeather]]) -> Double? {
         groups.flatMap { $0.map(\.precipitationMm) }.max()
     }
 
-    // MARK: - Temperatuur (rechter-as)
+    // MARK: - Temperature (right axis)
 
-    // °C → positie op het regen-domein (0...rainMax).
+    /// Maps °C to a position on the rain domain (0...rainMax).
     func normalizedTemp(_ celsius: Double) -> Double {
         guard tempMax > tempMin else { return 0 }
         return (celsius - tempMin) / (tempMax - tempMin) * rainMax
     }
 
-    // Even stappen vanaf tempMin, plus altijd de bovenste aswaarde (tempMax) zodat
-    // de hoogste temperatuur zichtbaar is. Een tick vlak onder de top wordt
-    // weggelaten om overlappende labels te voorkomen.
+    /// Even steps from tempMin, always including tempMax so the highest
+    /// temperature is visible. A tick just below the top is dropped to avoid
+    /// overlapping labels.
     var tempTicks: [Double] {
         let step = max(2, ((tempMax - tempMin) / 4 / 2).rounded() * 2)
         var ticks = Array(stride(from: tempMin, to: tempMax, by: step))
@@ -90,14 +87,15 @@ struct ChartGeometry: Equatable {
         return ticks
     }
 
-    // Positie op het regen-domein → afgeronde °C (rechter-as-label terugrekenen).
+    /// Inverse mapping: a position on the rain domain back to rounded °C for the
+    /// right-axis label.
     func temperature(atNormalized position: Double) -> Int {
         Int((tempMin + position / rainMax * (tempMax - tempMin)).rounded())
     }
 
-    // MARK: - Neerslag (linker-as)
+    // MARK: - Precipitation (left axis)
 
-    // Tick-waarden voor de regen-as: 0..rainMax in nette hele stappen.
+    /// Tick values for the rain axis: 0..rainMax in tidy whole steps.
     var rainTicks: [Double] {
         let step = max(1, (rainMax / 3).rounded(.up))
         return Array(stride(from: 0, through: rainMax, by: step))

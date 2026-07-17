@@ -1,13 +1,12 @@
 import Foundation
 
-// Pure presentatie-helpers voor temperatuur. Canonieke data blijft Celsius;
-// conversie en formatting gebeuren alleen hier, op de presentatiegrens, zodat
-// de rest van de app niets over eenheden hoeft te weten. Framework-licht
-// (alleen Foundation) en deterministisch, dus makkelijk te testen — de locale
-// is injecteerbaar zodat tests niet van het apparaat afhangen.
+// Pure presentation helpers for temperature. Canonical data stays Celsius;
+// conversion and formatting happen only here, at the presentation boundary, so
+// the rest of the app need not know about units. The locale is injectable so
+// tests do not depend on the device.
 
-// Bepaalt of temperaturen in Fahrenheit getoond moeten worden. `.system` leidt
-// dit af uit de locale (US-maatsysteem → Fahrenheit), verder is de keuze expliciet.
+/// Whether temperatures should be shown in Fahrenheit. `.system` derives this from
+/// the locale (US measurement system means Fahrenheit); otherwise the choice is explicit.
 func usesFahrenheit(_ unit: TemperatureUnit, locale: Locale = .current) -> Bool {
     switch unit {
     case .system: return locale.measurementSystem == .us
@@ -16,20 +15,20 @@ func usesFahrenheit(_ unit: TemperatureUnit, locale: Locale = .current) -> Bool 
     }
 }
 
-// Zet Celsius om naar de gekozen eenheid en rondt af op een hele graad, zoals
-// de bestaande "21°"-stijl in de UI. Rekent C→F als c * 9/5 + 32.
+/// Converts Celsius to the chosen unit and rounds to a whole degree, matching the
+/// existing "21°" UI style. Computes C→F as `c * 9 / 5 + 32`.
 func temperatureValue(celsius: Double, unit: TemperatureUnit, locale: Locale = .current) -> Int {
     let converted = usesFahrenheit(unit, locale: locale) ? celsius * 9 / 5 + 32 : celsius
     return Int(converted.rounded())
 }
 
-// Zelfde als temperatureValue maar voor een reeds afgeronde Celsius-Int (zoals
-// DecisionSummary.temperature levert). Houdt ±1° afronding acceptabel voor Fase 1.
+/// Same as `temperatureValue` but for an already-rounded Celsius Int (as supplied
+/// by `DecisionSummary.temperature`). A ±1° rounding difference is acceptable.
 func temperatureValue(celsius: Int, unit: TemperatureUnit, locale: Locale = .current) -> Int {
     temperatureValue(celsius: Double(celsius), unit: unit, locale: locale)
 }
 
-// Kale graden-string in de bestaande UI-stijl, bijv. "21°".
+/// Bare degrees string in the existing UI style, e.g. "21°".
 func temperatureString(celsius: Double, unit: TemperatureUnit, locale: Locale = .current) -> String {
     "\(temperatureValue(celsius: celsius, unit: unit, locale: locale))°"
 }

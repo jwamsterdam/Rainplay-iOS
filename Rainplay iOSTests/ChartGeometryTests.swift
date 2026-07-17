@@ -2,7 +2,7 @@ import Foundation
 @testable import Rainplay_iOS
 import Testing
 
-// De dubbele-as-geometrie (temperatuur ↔ regen-domein).
+/// Dual-axis geometry (temperature ↔ rain domain).
 struct ChartGeometryTests {
     private func hours(_ temps: [Double], precip: [Double] = []) -> [HourlyWeather] {
         temps.enumerated().map { i, t in
@@ -20,26 +20,26 @@ struct ChartGeometryTests {
 
     @Test func bottomEvenTopTight() {
         let geo = ChartGeometry(hours: hours([16.3, 23.7]))
-        #expect(geo.tempMin == 14)   // onder: ≥1° (15.3) afgerond op even graden
-        #expect(geo.tempMax == 25)   // boven: strak ⌈23.7+1⌉ = 25 (niet op even)
+        #expect(geo.tempMin == 14)   // bottom: ≥1° (15.3) rounded to even degrees
+        #expect(geo.tempMax == 25)   // top: tight ⌈23.7+1⌉ = 25 (not snapped to even)
     }
 
+    /// Exactly on even degrees: without a margin the line would touch the edge.
     @Test func guaranteesAtLeastOneDegreeMargin() {
-        // Precies op even graden: zonder marge zou de lijn de rand raken.
         let geo = ChartGeometry(hours: hours([16, 24]))
-        #expect(geo.tempMin <= 16 - 1)   // minimaal 1° onder de laagste temp
-        #expect(geo.tempMax >= 24 + 1)   // minimaal 1° boven de hoogste temp
+        #expect(geo.tempMin <= 16 - 1)   // at least 1° below the lowest temp
+        #expect(geo.tempMax >= 24 + 1)   // at least 1° above the highest temp
     }
 
+    /// On a hot day (max 32) the line may reach high: ~1° instead of up to ~3°.
     @Test func topMarginIsTighterThanEvenRounding() {
-        // Bij een hete dag (max 32) mag de lijn hoog komen: ~1° i.p.v. tot ~3°.
         let geo = ChartGeometry(hours: hours([18, 32]))
-        #expect(geo.tempMax == 33)   // ⌈32+1⌉, dus 1° boven de piek
+        #expect(geo.tempMax == 33)   // ⌈32+1⌉, i.e. 1° above the peak
     }
 
     @Test func topTickShowsMaxValue() {
         let geo = ChartGeometry(hours: hours([18, 32]))
-        #expect(geo.tempTicks.last == geo.tempMax)   // bovenste aswaarde (33) zichtbaar
+        #expect(geo.tempTicks.last == geo.tempMax)   // top axis value (33) visible
     }
 
     @Test func flatTemperatureRangeExpands() {
@@ -49,12 +49,12 @@ struct ChartGeometryTests {
         #expect(geo.tempMin < geo.tempMax)
     }
 
+    /// Two days with different temperatures → one shared axis covering both.
     @Test func sharedRangeSpansAllGroups() {
-        // Twee dagen met verschillende temperaturen → één gedeelde as die beide dekt.
         let range = ChartGeometry.temperatureRange(across: [hours([10, 15]), hours([20, 25])])
         let geo = ChartGeometry(temperatureRange: range, precipitationMax: nil)
-        #expect(geo.tempMin <= 10 - 1)   // dekt de laagste van alle dagen
-        #expect(geo.tempMax >= 25 + 1)   // dekt de hoogste van alle dagen
+        #expect(geo.tempMin <= 10 - 1)   // covers the lowest across all days
+        #expect(geo.tempMax >= 25 + 1)   // covers the highest across all days
     }
 
     @Test func normalizeMapsBoundsToDomainEdges() {
@@ -63,27 +63,27 @@ struct ChartGeometryTests {
         #expect(geo.normalizedTemp(geo.tempMax) == geo.rainMax)
     }
 
-    // MARK: - Regen-as
+    // MARK: - Rain axis
 
+    /// Little rain (max 1 mm) → axis stays at 3 mm so 1 mm doesn't look like "a lot".
     @Test func rainAxisFloorsAtThree() {
-        // Weinig regen (max 1 mm) → as blijft 3 mm, zodat 1 mm niet "veel" lijkt.
         let geo = ChartGeometry(hours: hours([18, 20], precip: [0.4, 1.0]))
         #expect(geo.rainMax == 3)
     }
 
+    /// Heavy shower (5.4 mm) → axis grows so bars stay on screen.
     @Test func rainAxisGrowsAboveThree() {
-        // Flinke bui (5,4 mm) → as groeit mee zodat balken niet buiten beeld lopen.
         let geo = ChartGeometry(hours: hours([18, 20], precip: [5.4, 2.0]))
-        #expect(geo.rainMax == 6)                 // ⌈5,4 + 0,5⌉
-        #expect(geo.rainTicks.last == geo.rainMax) // bovenste regenwaarde zichtbaar
+        #expect(geo.rainMax == 6)                 // ⌈5.4 + 0.5⌉
+        #expect(geo.rainTicks.last == geo.rainMax) // top rain value visible
     }
 
+    /// A peak landing exactly on a whole number (e.g. the week cap of 3 mm) gets
+    /// headroom: the axis becomes 4 so the bar doesn't touch the top edge.
     @Test func rainAxisLeavesHeadroomAbovePeak() {
-        // Een piek die exact op een heel getal valt (bijv. de week-cap van 3 mm)
-        // krijgt marge: de as wordt 4, zodat de balk de bovenrand niet raakt.
         let geo = ChartGeometry(hours: hours([18, 20], precip: [3.0, 0.0]))
-        #expect(geo.rainMax == 4)                 // ⌈3,0 + 0,5⌉
-        #expect(geo.rainMax > 3.0)                // strikt boven de piek
+        #expect(geo.rainMax == 4)                 // ⌈3.0 + 0.5⌉
+        #expect(geo.rainMax > 3.0)                // strictly above the peak
     }
 
     @Test func temperatureIsInverseOfNormalize() {

@@ -1,9 +1,9 @@
 import XCTest
 
-// UI smoke tests (the Cypress-equivalent): drive the real app on a simulator and
-// assert the critical flows work. Kept small and resilient — they check the
-// always-present chrome (segmented controls, attribution, settings), never the
-// network-dependent weather data, so they don't flake on CI without a network.
+/// UI smoke tests: drive the real app on a simulator and assert the critical flows
+/// work. Kept small and resilient — they check the always-present chrome (segmented
+/// controls, attribution, settings), never the network-dependent weather data, so
+/// they don't flake on CI without a network.
 final class RainplayiOSUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false

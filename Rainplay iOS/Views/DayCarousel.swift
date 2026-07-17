@@ -1,8 +1,8 @@
 import SwiftUI
 
-// Swipebare dag-carousel (src/components/DayCarousel.tsx). Native TabView in
-// page-stijl, two-way gekoppeld aan model.selectedDay. Elk paneel toont de
-// grafiek voor die dag; het laad-/foutpaneel deelt de plek.
+/// Swipeable day carousel: a page-style TabView bound two-way to
+/// model.selectedDay. Each panel shows the chart for that day; the
+/// loading/error panel shares the same slot.
 struct DayCarousel: View {
     @Bindable var model: AppModel
 
@@ -15,9 +15,9 @@ struct DayCarousel: View {
         )
     }
 
-    // As-schaal per dag. Alleen bij "Hele dag" is de as gedeeld over alle dagen
-    // (zodat je bij het swipen echt de temperatuurverschillen ziet). Bij de
-    // detailweergaves +6/+2 krijgt elk paneel z'n eigen, losgekoppelde as.
+    /// Axis scale per day. Only "Whole day" shares the axis across all days (so
+    /// swiping reveals the real temperature differences); the +6/+2 detail views
+    /// give each panel its own, independent axis.
     private func geometry(for day: DayOption) -> ChartGeometry {
         if model.selectedHorizon == .heleDag {
             let all = DayOption.allCases.map(hours(for:))

@@ -1,7 +1,6 @@
 import SwiftUI
 
-// Offline-banner (src/components/OfflineBanner.tsx). Toont alleen iets als er
-// geen netwerk is.
+/// Banner shown only when the network is unavailable.
 struct OfflineBanner: View {
     let isOffline: Bool
 

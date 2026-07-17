@@ -1,14 +1,12 @@
 import SwiftUI
 
-// Weericonen. De PWA tekent deze met inline-SVG's; hier gebruiken we native
-// SF Symbols (multicolor) — dat sluit aan op de native-first-opzet en oogt
-// consistent met Apple Weather. De symboolkeuze spiegelt de PWA-iconen.
+/// Weather icons rendered with multicolor SF Symbols for a native, Apple Weather-like look.
 struct WeatherIcon: View {
     let kind: WeatherKind
     var size: CGFloat = 22
 
-    // Expliciete kleuren per laag i.p.v. .multicolor — die rendert de wolk
-    // bijna wit, waardoor bewolkte uren onzichtbaar werden op de lichte rij.
+    /// Explicit per-layer colors instead of `.multicolor`, which renders the cloud
+    /// near-white and makes overcast hours invisible on the light row.
     private let cloudGray = Color(hex: "#aab4c0")
     private let sunYellow = Color(hex: "#ffc93c")
     private let rainBlue = Color(hex: "#4f9cf4")
@@ -41,7 +39,7 @@ struct WeatherIcon: View {
     }
 }
 
-// Icoon voor de instellingen-kleurenrijen (incl. "Nacht").
+/// Icon for the settings color rows (including "Night").
 struct SettingsColorIcon: View {
     let key: SettingsColorKey
 
@@ -66,7 +64,4 @@ struct SettingsColorIcon: View {
 enum SettingsColorKey: String, CaseIterable, Identifiable {
     case sun, partly, cloud, rain, night
     var id: String { rawValue }
-
-    // Gelokaliseerde weergavetitel leeft op de presentatiegrens:
-    // SettingsColorKey.titleKey in LocalizedLabels.swift.
 }
