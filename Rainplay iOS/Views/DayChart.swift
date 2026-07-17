@@ -134,7 +134,7 @@ struct DayChart: View {
             if showRain {
                 AxisValueLabel {
                     if let v = value.as(Double.self) {
-                        Text("\(Int(v))").foregroundStyle(Tokens.axisLabel)
+                        Text(verbatim: "\(Int(v))").foregroundStyle(Tokens.axisLabel)
                     }
                 }
             }
@@ -219,7 +219,7 @@ private struct ChartScoreIconRows: View {
                 if showIcons {
                     WeatherIcon(kind: hour.kind, size: 20)
                         .position(x: x, y: rect.minY - topRowsHeight + 40)
-                        .accessibilityLabel("\(spokenTime(hour)): \(hour.kind.displayName)")
+                        .accessibilityLabel(Text("a11y.timeWeather \(spokenTime(hour)) \(hour.kind.localizedText)"))
                 }
             }
         }
@@ -238,12 +238,12 @@ private struct ChartScoreIconRows: View {
     private func scoreBadge(_ hour: HourlyWeather) -> some View {
         ZStack {
             Circle().fill(scoreColor(hour.score)).frame(width: 22, height: 22)
-            Text("\(hour.score)")
+            Text(verbatim: "\(hour.score)")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(.white)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Score \(hour.score) om \(spokenTime(hour))")
+        .accessibilityLabel(Text("a11y.scoreAtTime \(hour.score) \(spokenTime(hour))"))
     }
 }
 
@@ -262,7 +262,7 @@ private struct ChartNowLine: View {
             }
             .stroke(Tokens.nowMarker, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
 
-            Text(currentTemperatureC.map { temperatureString(celsius: $0, unit: temperatureUnit) } ?? "nu")
+            (currentTemperatureC.map { Text(verbatim: temperatureString(celsius: $0, unit: temperatureUnit)) } ?? Text("chart.now"))
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Tokens.nowMarker)
                 .padding(.horizontal, 2)

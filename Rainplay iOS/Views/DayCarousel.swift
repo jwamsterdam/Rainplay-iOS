@@ -43,9 +43,9 @@ struct DayCarousel: View {
     @ViewBuilder
     private func panel(for day: DayOption) -> some View {
         if model.isLoading {
-            loadingPanel(text: "Weer laden")
+            loadingPanel(text: "carousel.loading")
         } else if model.loadFailed {
-            loadingPanel(text: "Weerdata niet beschikbaar", showRetry: true)
+            loadingPanel(text: "carousel.unavailable", showRetry: true)
         } else {
             DayChart(
                 hours: hours(for: day),
@@ -66,11 +66,11 @@ struct DayCarousel: View {
         }
     }
 
-    private func loadingPanel(text: String, showRetry: Bool = false) -> some View {
+    private func loadingPanel(text: LocalizedStringKey, showRetry: Bool = false) -> some View {
         VStack(spacing: 14) {
             Text(text)
             if showRetry {
-                Button("Opnieuw proberen") { model.retry() }
+                Button("carousel.retry") { model.retry() }
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Tokens.ink)
                     .padding(.horizontal, 18)

@@ -17,7 +17,7 @@ struct WeatherIcon: View {
         icon
             .font(.system(size: size * 0.9))
             .frame(width: size, height: size)
-            .accessibilityLabel(kind.displayName)
+            .accessibilityLabel(Text(kind.titleKey))
     }
 
     @ViewBuilder
@@ -67,13 +67,6 @@ enum SettingsColorKey: String, CaseIterable, Identifiable {
     case sun, partly, cloud, rain, night
     var id: String { rawValue }
 
-    var label: String {
-        switch self {
-        case .sun: return "Zon"
-        case .partly: return "Zon met bewolking"
-        case .cloud: return "Bewolkt"
-        case .rain: return "Regen"
-        case .night: return "Nacht"
-        }
-    }
+    // Gelokaliseerde weergavetitel leeft op de presentatiegrens:
+    // SettingsColorKey.titleKey in LocalizedLabels.swift.
 }

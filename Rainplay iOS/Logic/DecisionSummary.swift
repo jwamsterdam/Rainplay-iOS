@@ -12,7 +12,8 @@ struct DecisionSummary: Equatable {
     // "Buiten vanaf …").
     var headerDate: HeaderDate
     var bestStart: Date?
-    var summaryLabel: String
+    // Presentatievrij token; de view mapt dit naar gelokaliseerde tekst.
+    var summary: OutdoorSummary
 }
 
 func decisionSummary(
@@ -38,6 +39,6 @@ func decisionSummary(
         temperature: temperature,
         headerDate: headerDate(forecast?.hourly ?? [], day: day),
         bestStart: window?.start,
-        summaryLabel: outdoorSummaryLabel(hours, bestWindow: window)
+        summary: outdoorSummary(hours, bestWindow: window)
     )
 }

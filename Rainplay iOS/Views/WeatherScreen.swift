@@ -79,7 +79,7 @@ struct WeatherScreen: View {
                     locationMenuOpen = true
                 } label: {
                     HStack(spacing: 8) {
-                        Text(model.selectedLocation.name)
+                        Text(verbatim: model.selectedLocation.name)
                             .font(.system(size: 28, weight: .semibold))
                         if model.selectedLocation.source == .gps {
                             Image(systemName: "location.fill")
@@ -107,35 +107,35 @@ struct WeatherScreen: View {
                         .shadow(color: .black.opacity(0.15), radius: 3, y: 1)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Instellingen")
+                .accessibilityLabel(Text("settings.title"))
             }
             .padding(.horizontal, 4)
 
             VStack(spacing: 2) {
-                Text(model.selectedDay.rawValue)
+                Text(model.selectedDay.titleKey)
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundStyle(Tokens.heroDayLabel)
                 if let dateLabel = headerDateText(summary.headerDate) {
-                    Text(dateLabel)
+                    Text(verbatim: dateLabel)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(Tokens.heroDateLabel)
                 }
-                Text(summary.temperature.map { temperatureString(celsius: $0, unit: model.temperatureUnit) } ?? "--°")
+                Text(verbatim: summary.temperature.map { temperatureString(celsius: $0, unit: model.temperatureUnit) } ?? "--°")
                     .font(.system(size: 96, weight: .semibold))
                     .foregroundStyle(Tokens.inkStrong)
                     .accessibilityLabel(summary.temperature
-                        .map { "\(temperatureValue(celsius: $0, unit: model.temperatureUnit)) graden" }
-                        ?? "Temperatuur onbekend")
+                        .map { Text("a11y.temperatureDegrees \(temperatureValue(celsius: $0, unit: model.temperatureUnit))") }
+                        ?? Text("a11y.temperatureUnknown"))
                 // Alleen tonen wanneer er een echt venster is; bij lege/mislukte
-                // data draagt summaryLabel de boodschap i.p.v. "Buiten vanaf --:--".
+                // data draagt de samenvatting de boodschap i.p.v. "Buiten vanaf --:--".
                 if let bestStart = summary.bestStart {
-                    Text("Buiten vanaf \(timeString(date: bestStart, format: model.timeFormat))")
+                    Text("hero.outsideFrom \(timeString(date: bestStart, format: model.timeFormat))")
                         .font(.system(size: 30, weight: .heavy))
                         .foregroundStyle(Tokens.inkStrong)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                 }
-                Text(summary.summaryLabel)
+                Text(summary.summary.titleKey)
                     .font(.system(size: 18, weight: .regular))
                     .foregroundStyle(Tokens.heroSubtitle)
             }
@@ -158,13 +158,13 @@ struct WeatherScreen: View {
                 SegmentedControl(
                     options: HorizonOption.allCases,
                     selection: $model.selectedHorizon,
-                    label: { $0.rawValue },
+                    label: { $0.titleKey },
                     disabled: model.selectedDay != .vandaag
                 )
                 SegmentedControl(
                     options: DayOption.allCases,
                     selection: $model.selectedDay,
-                    label: { $0.displayLabel }
+                    label: { $0.segmentTitleKey }
                 )
             }
             .padding(.horizontal, 8)

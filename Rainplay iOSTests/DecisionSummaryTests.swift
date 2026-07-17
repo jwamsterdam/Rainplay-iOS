@@ -18,7 +18,7 @@ struct DecisionSummaryTests {
         let summary = decisionSummary(forecast: nil, day: .vandaag, horizon: .heleDag, now: Date())
         #expect(summary.temperature == nil)
         #expect(summary.bestStart == nil)
-        #expect(summary.summaryLabel == "Geen duidelijk buitenmoment")
+        #expect(summary.summary == .none)
         #expect(summary.headerDate == .none)
     }
 
@@ -36,6 +36,6 @@ struct DecisionSummaryTests {
         // Kop-datum is de canonieke dag (11 juni), de view formatteert die.
         #expect(summary.headerDate == .single(IsoTime.date("2026-06-11T12:00")))
         #expect(summary.bestStart != nil)                        // er is een venster
-        #expect(summary.summaryLabel.contains("beste"))          // vriendelijke nuance-regel
+        #expect(summary.summary != .none)                        // vriendelijke nuance-regel
     }
 }

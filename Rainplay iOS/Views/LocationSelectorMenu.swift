@@ -13,7 +13,7 @@ struct LocationSelectorMenu: View {
     @State private var query = ""
     @State private var suggestions: [ForecastLocation] = []
     @State private var isSearching = false
-    @State private var searchError: String?
+    @State private var searchError: LocalizedStringKey?
 
     private var gpsLocation: ForecastLocation? {
         model.selectedLocation.source == .gps ? model.selectedLocation : nil
@@ -30,7 +30,7 @@ struct LocationSelectorMenu: View {
                 }
 
                 if !model.savedLocations.isEmpty {
-                    Section("Opgeslagen") {
+                    Section("location.saved") {
                         ForEach(model.savedLocations, id: \.key) { location in
                             savedRow(location)
                         }
@@ -38,11 +38,11 @@ struct LocationSelectorMenu: View {
                     }
                 }
 
-                Section("Plaats zoeken") {
-                    TextField("Plaats zoeken", text: $query)
+                Section("location.search") {
+                    TextField("location.search", text: $query)
                         .autocorrectionDisabled()
                     if isSearching {
-                        Text("Zoeken...").font(.footnote).foregroundStyle(Tokens.inkSoft)
+                        Text("location.searching").font(.footnote).foregroundStyle(Tokens.inkSoft)
                     }
                     if let searchError {
                         Text(searchError).font(.footnote).foregroundStyle(Tokens.scoreBad)
@@ -52,21 +52,21 @@ struct LocationSelectorMenu: View {
                             choose(suggestion)
                         } label: {
                             HStack {
-                                Text(suggestion.name).foregroundStyle(Tokens.ink)
+                                Text(verbatim: suggestion.name).foregroundStyle(Tokens.ink)
                                 Spacer()
                                 if let country = suggestion.country {
-                                    Text(country).font(.footnote).foregroundStyle(Tokens.inkSoft)
+                                    Text(verbatim: country).font(.footnote).foregroundStyle(Tokens.inkSoft)
                                 }
                             }
                         }
                     }
                 }
             }
-            .navigationTitle("Locatie")
+            .navigationTitle("location.title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Klaar") { isPresented = false }
+                    Button("common.done") { isPresented = false }
                 }
             }
             .task(id: query) { await runSearch() }
@@ -87,10 +87,10 @@ struct LocationSelectorMenu: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(gpsLocation?.name ?? "Huidige locatie")
+                    (gpsLocation.map { Text(verbatim: $0.name) } ?? Text("location.current"))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Tokens.ink)
-                    Text(model.locationService.status == .locating ? "Locatie ophalen..." : "GPS locatie")
+                    Text(model.locationService.status == .locating ? "location.locating" : "location.gps")
                         .font(.system(size: 12))
                         .foregroundStyle(Tokens.inkMuted)
                 }
@@ -107,10 +107,10 @@ struct LocationSelectorMenu: View {
     // naar de systeeminstellingen (App Review test dit pad expliciet).
     private var locationDeniedRow: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Geen toegang tot je locatie. Zet locatietoegang aan in Instellingen om je huidige plek te gebruiken.")
+            Text("location.deniedMessage")
                 .font(.system(size: 13))
                 .foregroundStyle(Tokens.inkMuted)
-            Button("Open Instellingen") {
+            Button("location.openSettings") {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     openURL(url)
                 }
@@ -126,7 +126,7 @@ struct LocationSelectorMenu: View {
             isPresented = false
         } label: {
             HStack {
-                Text(location.name).foregroundStyle(Tokens.ink)
+                Text(verbatim: location.name).foregroundStyle(Tokens.ink)
                 Spacer()
                 if ForecastLocation.isSame(location, model.selectedLocation) {
                     Image(systemName: "checkmark").foregroundStyle(Tokens.accent)
@@ -171,10 +171,10 @@ struct LocationSelectorMenu: View {
             let results = try await searchLocations(search)
             if Task.isCancelled { return }
             suggestions = results
-            searchError = results.isEmpty ? "Geen plaatsen gevonden." : nil
+            searchError = results.isEmpty ? "location.noResults" : nil
         } catch {
             if Task.isCancelled { return }
-            searchError = "Zoeken lukte niet."
+            searchError = "location.searchFailed"
             suggestions = []
         }
         isSearching = false

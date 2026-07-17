@@ -7,7 +7,7 @@ struct OfflineBanner: View {
 
     var body: some View {
         if isOffline {
-            Text("Geen internetverbinding")
+            Text("offline.banner")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)

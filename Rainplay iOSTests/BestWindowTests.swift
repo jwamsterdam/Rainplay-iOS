@@ -39,7 +39,7 @@ struct BestWindowTests {
 
     @Test func emptySeriesReturnsFallbacks() {
         #expect(bestOutdoorWindow([]) == nil)
-        #expect(outdoorSummaryLabel([], bestWindow: nil) == "Geen duidelijk buitenmoment")
+        #expect(outdoorSummary([], bestWindow: nil) == .none)
     }
 
     @Test func prefersLongestBrightDryPracticalWindow() {
@@ -104,7 +104,7 @@ struct BestWindowTests {
         #expect(best?.end == nil)
     }
 
-    // MARK: - outdoorSummaryLabel
+    // MARK: - outdoorSummary (semantische tokens; de view lokaliseert ze)
 
     @Test func describesWindowBetweenRainyPeriods() {
         let hours = [
@@ -112,7 +112,7 @@ struct BestWindowTests {
             hour("14:00", score: 9, kind: .sun),
             hour("18:00", precip: 0.4, kind: .rain),
         ]
-        #expect(outdoorSummaryLabel(hours, bestWindow: bestOutdoorWindow(hours)) == "Tussen buien door - middag beste")
+        #expect(outdoorSummary(hours, bestWindow: bestOutdoorWindow(hours)) == .betweenShowers(period: .afternoon))
     }
 
     @Test func describesDryMorningBeforeLaterRain() {
@@ -120,7 +120,7 @@ struct BestWindowTests {
             hour("09:00", score: 9, kind: .sun),
             hour("12:00", precip: 0.4, kind: .rain),
         ]
-        #expect(outdoorSummaryLabel(hours, bestWindow: bestOutdoorWindow(hours)) == "Ochtend beste - later regen")
+        #expect(outdoorSummary(hours, bestWindow: bestOutdoorWindow(hours)) == .clearThenRain(period: .morning))
     }
 
     @Test func describesClearAfternoonAfterMorningRain() {
@@ -128,12 +128,12 @@ struct BestWindowTests {
             hour("06:00", precip: 0.4, kind: .rain),
             hour("14:00", score: 9, kind: .sun),
         ]
-        #expect(outdoorSummaryLabel(hours, bestWindow: bestOutdoorWindow(hours)) == "Na regen - middag beste")
+        #expect(outdoorSummary(hours, bestWindow: bestOutdoorWindow(hours)) == .afterRain(period: .afternoon))
     }
 
     @Test func describesFullyClearPeriod() {
         let hours = [hour("09:00", score: 9, kind: .sun)]
-        #expect(outdoorSummaryLabel(hours, bestWindow: bestOutdoorWindow(hours)) == "Ochtend beste buitenmoment")
+        #expect(outdoorSummary(hours, bestWindow: bestOutdoorWindow(hours)) == .clear(period: .morning))
     }
 
     @Test func usesEveningLabelForWindowsStartingAt18OrLater() {
@@ -143,6 +143,6 @@ struct BestWindowTests {
             start: IsoTime.date("2026-06-11T19:00"),
             end: IsoTime.date("2026-06-11T20:00")
         )
-        #expect(outdoorSummaryLabel([], bestWindow: evening) == "Avond beste buitenmoment")
+        #expect(outdoorSummary([], bestWindow: evening) == .clear(period: .evening))
     }
 }

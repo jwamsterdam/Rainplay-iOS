@@ -13,20 +13,39 @@ struct OutdoorWindow: Equatable {
     var end: Date?
 }
 
+// Dagperiode-token. Presentatievrij: de view mapt dit naar gelokaliseerde tekst
+// (zie OutdoorSummary+Localized), zodat de logica geen zinnen samenstelt.
+enum DayPeriod: Equatable {
+    case morning
+    case afternoon
+    case evening
+}
+
+// Nuance-regel onder het verdict als presentatievrij token: benoemt de beste
+// dagperiode en of er regen vóór/ná het venster valt. De view mapt dit naar één
+// gelokaliseerde zin (incl. het periode-woord) i.p.v. strings samen te plakken.
+enum OutdoorSummary: Equatable {
+    case none
+    case clear(period: DayPeriod)
+    case afterRain(period: DayPeriod)
+    case clearThenRain(period: DayPeriod)
+    case betweenShowers(period: DayPeriod)
+}
+
 // Nuance-regel onder het verdict: benoemt de beste dagperiode en waarschuwt voor
 // regen vóór of ná het venster.
-func outdoorSummaryLabel(_ hours: [HourlyWeather], bestWindow: OutdoorWindow?) -> String {
-    guard let bestWindow else { return "Geen duidelijk buitenmoment" }
+func outdoorSummary(_ hours: [HourlyWeather], bestWindow: OutdoorWindow?) -> OutdoorSummary {
+    guard let bestWindow else { return .none }
 
-    let period = dayPeriodLabel(bestWindow.start)
+    let period = dayPeriod(bestWindow.start)
     let rainBefore = hours.prefix(bestWindow.startIndex).contains(where: hasMeaningfulRain)
     let rainAfter = hours.dropFirst(bestWindow.endIndex + 1).contains(where: hasMeaningfulRain)
 
-    if rainBefore && rainAfter { return "Tussen buien door - \(period) beste" }
-    if rainBefore { return "Na regen - \(period) beste" }
-    if rainAfter { return "\(capitalize(period)) beste - later regen" }
+    if rainBefore && rainAfter { return .betweenShowers(period: period) }
+    if rainBefore { return .afterRain(period: period) }
+    if rainAfter { return .clearThenRain(period: period) }
 
-    return "\(capitalize(period)) beste buitenmoment"
+    return .clear(period: period)
 }
 
 func bestOutdoorWindow(_ hours: [HourlyWeather]) -> OutdoorWindow? {
@@ -157,14 +176,9 @@ private func hasMeaningfulRain(_ hour: HourlyWeather) -> Bool {
     hour.kind == .rain || hour.precipitationMm >= 0.2
 }
 
-private func dayPeriodLabel(_ start: Date) -> String {
+private func dayPeriod(_ start: Date) -> DayPeriod {
     let hour = Calendar.current.component(.hour, from: start)
-    if hour < 12 { return "ochtend" }
-    if hour < 18 { return "middag" }
-    return "avond"
-}
-
-private func capitalize(_ value: String) -> String {
-    guard let first = value.first else { return value }
-    return String(first).uppercased() + value.dropFirst()
+    if hour < 12 { return .morning }
+    if hour < 18 { return .afternoon }
+    return .evening
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // Instellingen (src/components/SettingsPanel.tsx), zonder het diagnostiek-blok.
 // Lagen aan/uit, schemering-drempel en de vijf grafiekkleuren met native
@@ -6,6 +7,7 @@ import SwiftUI
 struct SettingsSheet: View {
     @Bindable var model: AppModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     // Versie + build uit de app-bundle (MARKETING_VERSION / CURRENT_PROJECT_VERSION),
     // zodat gebruikers bij een issue kunnen doorgeven op welke versie ze zitten.
@@ -23,16 +25,17 @@ struct SettingsSheet: View {
                     temperatureSection
                     timeSection
                     dateSection
+                    languageSection
                     layersSection
                     twilightSection
-                    Text("Tik op het kleurvlak om de kleur te kiezen. Sleep de schuifregelaar voor de intensiteit.")
+                    Text("settings.colorHelp")
                         .font(.system(size: 13))
                         .foregroundStyle(Tokens.inkMuted)
                     colorList
                     Button {
                         dismiss()
                     } label: {
-                        Text("Klaar")
+                        Text("common.done")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -49,7 +52,7 @@ struct SettingsSheet: View {
                 }
                 .padding(20)
             }
-            .navigationTitle("Grafiekkleuren")
+            .navigationTitle("settings.chartColors")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -66,7 +69,7 @@ struct SettingsSheet: View {
     // elders → °C); °C/°F forceren de keuze. Zie MeasurementFormatting.
     private var temperatureSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Temperatuur").font(.system(size: 15, weight: .semibold))
+            Text("settings.temperature").font(.system(size: 15, weight: .semibold))
             SegmentedControl(
                 options: TemperatureUnit.allCases,
                 selection: $model.temperatureUnit,
@@ -75,11 +78,11 @@ struct SettingsSheet: View {
         }
     }
 
-    private func temperatureUnitLabel(_ unit: TemperatureUnit) -> String {
+    private func temperatureUnitLabel(_ unit: TemperatureUnit) -> LocalizedStringKey {
         switch unit {
-        case .system: return "Systeem"
-        case .celsius: return "°C"
-        case .fahrenheit: return "°F"
+        case .system: return "common.system"
+        case .celsius: return "unit.celsius"
+        case .fahrenheit: return "unit.fahrenheit"
         }
     }
 
@@ -87,7 +90,7 @@ struct SettingsSheet: View {
     // 12u/24u forceren de keuze. Canonieke tijden blijven isoTime (TimeFormatting).
     private var timeSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Tijdnotatie").font(.system(size: 15, weight: .semibold))
+            Text("settings.timeFormat").font(.system(size: 15, weight: .semibold))
             SegmentedControl(
                 options: TimeFormat.allCases,
                 selection: $model.timeFormat,
@@ -96,11 +99,11 @@ struct SettingsSheet: View {
         }
     }
 
-    private func timeFormatLabel(_ format: TimeFormat) -> String {
+    private func timeFormatLabel(_ format: TimeFormat) -> LocalizedStringKey {
         switch format {
-        case .system: return "Systeem"
-        case .twelveHour: return "12u"
-        case .twentyFourHour: return "24u"
+        case .system: return "common.system"
+        case .twelveHour: return "time.12h"
+        case .twentyFourHour: return "time.24h"
         }
     }
 
@@ -108,7 +111,7 @@ struct SettingsSheet: View {
     // kiezen tussen wel/geen weekdag (voorbeeld erbij zodat het meteen duidelijk is).
     private var dateSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Datumnotatie").font(.system(size: 15, weight: .semibold))
+            Text("settings.dateFormat").font(.system(size: 15, weight: .semibold))
             SegmentedControl(
                 options: DateStyle.allCases,
                 selection: $model.dateFormat,
@@ -117,37 +120,66 @@ struct SettingsSheet: View {
         }
     }
 
-    private func dateStyleLabel(_ style: DateStyle) -> String {
+    private func dateStyleLabel(_ style: DateStyle) -> LocalizedStringKey {
         switch style {
-        case .system: return "Systeem"
-        case .dayMonth: return "1 jul"
-        case .weekdayDayMonth: return "za 1 jul"
+        case .system: return "common.system"
+        case .dayMonth: return "date.example.dayMonth"
+        case .weekdayDayMonth: return "date.example.weekdayDayMonth"
+        }
+    }
+
+    // Taalkeuze verloopt via het iOS per-app-taalscherm (Instellingen → App).
+    // We openen dat scherm zoals de locatie-herstelknop in LocationSelectorMenu.
+    private var languageSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("settings.language").font(.system(size: 15, weight: .semibold))
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(url)
+                }
+            } label: {
+                HStack {
+                    Text("settings.language.open")
+                    Spacer()
+                    Image(systemName: "arrow.up.forward.app")
+                }
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Tokens.accent)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 44)
+                .background(Tokens.control, in: RoundedRectangle(cornerRadius: Tokens.radiusControl))
+            }
+            .buttonStyle(.plain)
+            Text("settings.language.help")
+                .font(.system(size: 13))
+                .foregroundStyle(Tokens.inkMuted)
         }
     }
 
     private var layersSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Grafiek lagen").font(.system(size: 15, weight: .semibold))
+            Text("settings.chartLayers").font(.system(size: 15, weight: .semibold))
             HStack(spacing: 8) {
-                LayerToggle(label: "Temperatuur", color: Tokens.temperature, isOn: $model.showTemp)
-                LayerToggle(label: "Neerslag", color: Tokens.rain, isOn: $model.showRain)
-                LayerToggle(label: "Iconen", color: Color(hex: "#64748b"), isOn: $model.showIcons)
+                LayerToggle(label: "layer.temperature", color: Tokens.temperature, isOn: $model.showTemp)
+                LayerToggle(label: "layer.precipitation", color: Tokens.rain, isOn: $model.showRain)
+                LayerToggle(label: "layer.icons", color: Color(hex: "#64748b"), isOn: $model.showIcons)
             }
         }
     }
 
     private var twilightSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Schemering drempel").font(.system(size: 15, weight: .semibold))
+            Text("settings.twilightThreshold").font(.system(size: 15, weight: .semibold))
             HStack(spacing: 12) {
                 Slider(value: $model.twilightRadiation, in: 1...200, step: 1)
                     .tint(Tokens.accent)
-                Text("\(Int(model.twilightRadiation)) W/m²")
+                Text(verbatim: "\(Int(model.twilightRadiation)) W/m²")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Tokens.inkMuted)
                     .frame(width: 64, alignment: .trailing)
             }
-            Text("Lager = scherpere overgang · standaard 20")
+            Text("settings.twilightHelp")
                 .font(.system(size: 13))
                 .foregroundStyle(Tokens.inkMuted)
         }
@@ -193,7 +225,7 @@ struct SettingsSheet: View {
 }
 
 private struct LayerToggle: View {
-    let label: String
+    let label: LocalizedStringKey
     let color: Color
     @Binding var isOn: Bool
 
@@ -223,7 +255,7 @@ private struct ColorRow: View {
         VStack(spacing: 6) {
             HStack {
                 SettingsColorIcon(key: key)
-                Text(key.label).font(.system(size: 15, weight: .medium))
+                Text(key.titleKey).font(.system(size: 15, weight: .medium))
                 Spacer()
                 ColorPicker("", selection: swatchBinding, supportsOpacity: false)
                     .labelsHidden()
@@ -231,12 +263,12 @@ private struct ColorRow: View {
             HStack(spacing: 10) {
                 Slider(value: alphaBinding, in: 0...1)
                     .tint(Tokens.accent)
-                Text("\(Int((color.a * 100).rounded()))%")
+                Text(verbatim: "\(Int((color.a * 100).rounded()))%")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Tokens.inkMuted)
                     .frame(width: 36, alignment: .trailing)
             }
-            Text(color.css)
+            Text(verbatim: color.css)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(Tokens.inkSoft)
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -7,7 +7,7 @@ import SwiftUI
 struct SegmentedControl<Option: Identifiable & Equatable>: View {
     let options: [Option]
     @Binding var selection: Option
-    let label: (Option) -> String
+    let label: (Option) -> LocalizedStringKey
     var disabled: Bool = false
 
     @Namespace private var indicator
@@ -25,6 +25,9 @@ struct SegmentedControl<Option: Identifiable & Equatable>: View {
                     }
                 } label: {
                     Text(label(option))
+                        // label is een LocalizedStringKey; unit-symbolen (°C/°F)
+                        // en enkele afkortingen zijn taal-neutraal en staan als
+                        // key == waarde in de catalog.
                         .font(.system(size: fontSize, weight: isActive ? .semibold : .medium))
                         .foregroundStyle(isActive ? Tokens.ink : Color(hex: "#4b5565"))
                         .lineLimit(1)

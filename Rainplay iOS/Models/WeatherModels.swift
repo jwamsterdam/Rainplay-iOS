@@ -9,15 +9,9 @@ enum WeatherKind: String, Codable {
     case partly
     case sun
 
-    // Nederlandse naam voor VoiceOver-labels e.d.
-    var displayName: String {
-        switch self {
-        case .rain: return "Regen"
-        case .cloud: return "Bewolkt"
-        case .partly: return "Zon met bewolking"
-        case .sun: return "Zon"
-        }
-    }
+    // Weergavenamen (VoiceOver-labels e.d.) leven op de presentatiegrens in
+    // Views/Formatting/LocalizedLabels.swift (WeatherKind.titleKey), zodat dit
+    // model presentatievrij blijft.
 }
 
 enum DayOption: String, CaseIterable, Identifiable {
@@ -28,8 +22,9 @@ enum DayOption: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    // De dag-selector kort "Overmorgen" af tot "Overm.", zoals de PWA.
-    var displayLabel: String { self == .overmorgen ? "Overm." : rawValue }
+    // De weergavetitel (incl. de "Overm."-afkorting) leeft gelokaliseerd op de
+    // presentatiegrens: DayOption.titleKey in LocalizedLabels.swift. rawValue
+    // blijft de stabiele identiteit/opslagsleutel en verandert daarom niet.
 }
 
 enum HorizonOption: String, CaseIterable, Identifiable {
