@@ -1,10 +1,27 @@
 import SwiftUI
+import UIKit
 
 // Ontwerp-tokens geport uit de PWA (src/design/tokens.css). Kleuren, radii en
 // spacing die door de views gedeeld worden. SF Pro (het systeemfont) vervangt
 // Inter — dat is de native, meegeleverde variant.
+//
+// Kleuren zijn dynamisch: ze lossen per interface-stijl (licht/donker) op, zodat
+// de views automatisch meebewegen met de systeem-instelling. De luchtfoto in de
+// hero blijft in beide modi gelijk; alleen de overlay/tekst/oppervlakken wisselen.
 
 extension Color {
+    // Dynamische kleur die licht/donker oplost via de trait-collectie.
+    init(light: Color, dark: Color) {
+        self.init(UIColor { traits in
+            UIColor(traits.userInterfaceStyle == .dark ? dark : light)
+        })
+    }
+
+    // Zelfde, maar direct vanuit twee hex-strings voor beknopte token-definities.
+    init(lightHex: String, darkHex: String) {
+        self.init(light: Color(hex: lightHex), dark: Color(hex: darkHex))
+    }
+
     init(hex: String) {
         let cleaned = hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
         var value: UInt64 = 0
@@ -33,34 +50,59 @@ extension Color {
 }
 
 enum Tokens {
-    // Kleuren
-    static let ink = Color(hex: "#101828")
-    static let inkStrong = Color(hex: "#091526")
-    static let inkMuted = Color(hex: "#697586")
-    static let inkSoft = Color(hex: "#8a95a4")
+    // Tekstkleuren (donker op licht ↔ licht op donker).
+    static let ink = Color(lightHex: "#101828", darkHex: "#E6EAF1")
+    static let inkStrong = Color(lightHex: "#091526", darkHex: "#F4F7FB")
+    static let inkMuted = Color(lightHex: "#697586", darkHex: "#9AA4B2")
+    static let inkSoft = Color(lightHex: "#8a95a4", darkHex: "#7C8695")
 
-    // Hero-tekstkleuren (donkerblauw met afnemende dekking), voorheen inline.
-    static let heroDayLabel = Color(red: 15 / 255, green: 30 / 255, blue: 52 / 255, opacity: 0.76)
-    static let heroDateLabel = Color(red: 15 / 255, green: 30 / 255, blue: 52 / 255, opacity: 0.62)
-    static let heroSubtitle = Color(red: 14 / 255, green: 31 / 255, blue: 52 / 255, opacity: 0.68)
+    // Hero-tekstkleuren. Licht: donkerblauw over de heldere luchtfoto. Donker:
+    // wit over het donkere scrim dat diezelfde foto dimt (zie WeatherScreen).
+    static let heroDayLabel = Color(
+        light: Color(red: 15 / 255, green: 30 / 255, blue: 52 / 255, opacity: 0.76),
+        dark: Color(white: 1, opacity: 0.88)
+    )
+    static let heroDateLabel = Color(
+        light: Color(red: 15 / 255, green: 30 / 255, blue: 52 / 255, opacity: 0.62),
+        dark: Color(white: 1, opacity: 0.70)
+    )
+    static let heroSubtitle = Color(
+        light: Color(red: 14 / 255, green: 31 / 255, blue: 52 / 255, opacity: 0.68),
+        dark: Color(white: 1, opacity: 0.78)
+    )
 
-    static let surface = Color(hex: "#ffffff")
-    static let control = Color(hex: "#f3f6f9")
-    static let accent = Color(hex: "#1d7eea")
+    // Oppervlakken. surface = de grote "decision sheet" + panelen; control = de
+    // lichte besturingsvlakken (segmented-track, knoppen, kaartjes).
+    static let surface = Color(lightHex: "#ffffff", darkHex: "#1B1E25")
+    static let control = Color(lightHex: "#f3f6f9", darkHex: "#23262E")
+    // De actieve thumb in de segmented control: net lichter dan de track zodat
+    // hij in beide modi "opduikt" (in donker mag surface niet dezelfde tint zijn).
+    static let segmentThumb = Color(lightHex: "#ffffff", darkHex: "#363B45")
+    static let accent = Color(lightHex: "#1d7eea", darkHex: "#4A9BF5")
     static let rain = Color(hex: "#78b4f8")
     static let temperature = Color(hex: "#f97316")
-    static let best = Color(hex: "#fff1c9")
-    static let border = Color(red: 220 / 255, green: 228 / 255, blue: 236 / 255, opacity: 0.88)
+    static let best = Color(lightHex: "#fff1c9", darkHex: "#3E3620")
+    static let border = Color(
+        light: Color(red: 220 / 255, green: 228 / 255, blue: 236 / 255, opacity: 0.88),
+        dark: Color(white: 1, opacity: 0.14)
+    )
 
-    // Score-kleuren (chartHelpers.ts)
+    // Inactieve segment-tekst en de subtiele rand rond de segmented-track.
+    static let segmentInactive = Color(lightHex: "#4b5565", darkHex: "#AEB6C2")
+    static let segmentTrackStroke = Color(
+        light: Color(red: 226 / 255, green: 232 / 255, blue: 240 / 255, opacity: 0.74),
+        dark: Color(white: 1, opacity: 0.10)
+    )
+
+    // Score-kleuren (chartHelpers.ts) — semantisch, gelijk in beide modi.
     static let scoreGood = Color(hex: "#93bf00")
     static let scoreOk = Color(hex: "#f58a1f")
     static let scoreLow = Color(hex: "#f3b329")
     static let scoreBad = Color(hex: "#e15d4f")
 
     // Grafiek-lijnkleuren
-    static let grid = Color(hex: "#dce3ea")
-    static let axisLabel = Color(hex: "#697586")
+    static let grid = Color(lightHex: "#dce3ea", darkHex: "#3A404A")
+    static let axisLabel = Color(lightHex: "#697586", darkHex: "#9AA4B2")
     static let tempAxisLabel = Color(hex: "#ff8a3d")
     static let nowMarker = Color(hex: "#ff3b30")
 

@@ -6,6 +6,7 @@ struct WeatherScreen: View {
     @Bindable var model: AppModel
     @State private var settingsOpen = false
     @State private var locationMenuOpen = false
+    @Environment(\.colorScheme) private var colorScheme
 
     // Alle afgeleide kop-informatie in één keer berekend (temperatuur, datum,
     // beste-moment-venster, adviesteksten) — zie DecisionSummary.
@@ -60,15 +61,30 @@ struct WeatherScreen: View {
             .scaledToFill()
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .ignoresSafeArea()
-            .overlay(
+            .overlay(heroOverlay.ignoresSafeArea())
+    }
+
+    // De luchtfoto zelf blijft in beide modi gelijk. In licht ligt er een zachte
+    // witte gloed overheen; in donker een donker scrim dat de foto dimt zodat de
+    // (dan lichte) hero-tekst goed leesbaar blijft.
+    private var heroOverlay: some View {
+        Group {
+            if colorScheme == .dark {
+                RadialGradient(
+                    colors: [.black.opacity(0.28), .black.opacity(0.58)],
+                    center: UnitPoint(x: 0.5, y: 0.42),
+                    startRadius: 0,
+                    endRadius: 320
+                )
+            } else {
                 RadialGradient(
                     colors: [.white.opacity(0.22), .clear],
                     center: UnitPoint(x: 0.5, y: 0.42),
                     startRadius: 0,
                     endRadius: 260
                 )
-                .ignoresSafeArea()
-            )
+            }
+        }
     }
 
     private func hero(_ summary: DecisionSummary) -> some View {

@@ -29,7 +29,7 @@ struct SegmentedControl<Option: Identifiable & Equatable>: View {
                         // en enkele afkortingen zijn taal-neutraal en staan als
                         // key == waarde in de catalog.
                         .font(.system(size: fontSize, weight: isActive ? .semibold : .medium))
-                        .foregroundStyle(isActive ? Tokens.ink : Color(hex: "#4b5565"))
+                        .foregroundStyle(isActive ? Tokens.ink : Tokens.segmentInactive)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity)
@@ -37,7 +37,7 @@ struct SegmentedControl<Option: Identifiable & Equatable>: View {
                         .background {
                             if isActive {
                                 RoundedRectangle(cornerRadius: Tokens.radiusControlInner)
-                                    .fill(Tokens.surface)
+                                    .fill(Tokens.segmentThumb)
                                     .shadow(color: .black.opacity(0.06), radius: 1, y: 1)
                                     .shadow(color: .black.opacity(0.08), radius: 9, y: 4)
                                     .matchedGeometryEffect(id: "thumb", in: indicator)
@@ -54,7 +54,7 @@ struct SegmentedControl<Option: Identifiable & Equatable>: View {
         .background(
             RoundedRectangle(cornerRadius: Tokens.radiusControl)
                 .fill(Tokens.control)
-                .stroke(Color(red: 226 / 255, green: 232 / 255, blue: 240 / 255, opacity: 0.74), lineWidth: 1)
+                .stroke(Tokens.segmentTrackStroke, lineWidth: 1)
         )
         .opacity(disabled ? 0.62 : 1)
     }
