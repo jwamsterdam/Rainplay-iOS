@@ -1,5 +1,7 @@
 # Rainplay iOS
 
+[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=jwamsterdam_Rainplay-iOS&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jwamsterdam_Rainplay-iOS)
+
 An iPhone-first, calm outdoor-weather app. Rainplay answers one question:
 
 > Should we go outside now, wait a few hours, or pick tomorrow?
